@@ -1,0 +1,7 @@
+tensorflow-gpu==2.0.0
+numpy>=1.16.2
+shap==0.35.0
+pandas>=1.0.4
+matplotlib>=3.2.1
+black==19.10
+rpy2==3.3.3
