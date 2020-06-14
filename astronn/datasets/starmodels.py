@@ -1,5 +1,4 @@
 import logging
-import typing tf
 
 import glob
 import numpy as np
@@ -13,7 +12,7 @@ class starmodels(Data):
     This class loads all star models generated with CESTAM and FILOU codes
     """
 
-    def load(self, folder) -> tf:
+    def load(self, folder):
         """
         method to load all files from a folder
         """
@@ -44,7 +43,7 @@ class starmodels(Data):
         n_readers=5,
     ):
         """
-            """
+        """
         dataset = tf.data.Dataset.list_files(filenames)
         dataset = dataset.repeat()
         dataset = dataset.interleave(
@@ -55,4 +54,3 @@ class starmodels(Data):
         dataset = dataset.map(self.parse_csv_line, num_parallel_calls=n_parse_threads)
         dataset = dataset.batch(batch_size)
         return dataset.prefetch(1)
-
