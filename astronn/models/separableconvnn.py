@@ -12,7 +12,7 @@ class separableconvnn(Model):
     Main model to work with several channels in asteroseismology
     """
 
-    def create(self):
+    def compile(self):
         """
         load all files on a given directory (and recursive directories)
 
@@ -42,16 +42,24 @@ class separableconvnn(Model):
                 layers.Dense(100, activation="softmax"),
             ]
         )
+        opt = tf.keras.optimizers.Adam(learning_rate=0.0001)
+
+        self.model.compile(
+            loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"]
+        )
+
         self.model.summary()
 
-    def fit(self):
+    def fit(self, dataset):
         """
         load all files on a given directory (and recursive directories)
 
         :return: [description]
         :rtype: PricingObservation
         """
-        pass
+
+        history = self.model.fit(dataset, steps_per_epoch=100, epochs=20)
+        return history
 
     def predict(self):
         """
@@ -62,20 +70,20 @@ class separableconvnn(Model):
         """
         pass
 
-    def save(self):
+    def save(self, path):
         """
         load all files on a given directory (and recursive directories)
 
         :return: [description]
         :rtype: PricingObservation
         """
-        pass
+        self.model.save(path)
 
-    def load(self):
+    def load(self, path):
         """
         load all files on a given directory (and recursive directories)
 
         :return: [description]
         :rtype: PricingObservation
         """
-        pass
+        self.model.load(path)

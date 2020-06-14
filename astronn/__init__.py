@@ -23,7 +23,7 @@ class Model(ABC):
     """
 
     @abstractmethod
-    def create(self):
+    def compile(self):
         """
         load all files on a given directory (and recursive directories)
 
