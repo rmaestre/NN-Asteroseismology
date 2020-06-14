@@ -19,7 +19,7 @@ class Data(ABC):
 
 class Model(ABC):
     """
-    dataset to load stars preprocessed data.
+    model with generic operations
     """
 
     @abstractmethod
