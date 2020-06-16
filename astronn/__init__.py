@@ -43,7 +43,17 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def predict(self):
+    def predict_classes(self):
+        """
+        load all files on a given directory (and recursive directories)
+
+        :return: [description]
+        :rtype: PricingObservation
+        """
+        pass
+
+    @abstractmethod
+    def predict_probs(self):
         """
         load all files on a given directory (and recursive directories)
 

@@ -61,14 +61,23 @@ class separableconvnn(Model):
         history = self.model.fit(dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)
         return history
 
-    def predict(self):
+    def predict_classes(self, data):
         """
         load all files on a given directory (and recursive directories)
 
         :return: [description]
         :rtype: PricingObservation
         """
-        pass
+        return self.model.predict_classes(data)
+
+    def predict_probs(self, data):
+        """
+        load all files on a given directory (and recursive directories)
+
+        :return: [description]
+        :rtype: PricingObservation
+        """
+        return self.model.predict_probs(data)
 
     def save(self, path):
         """
