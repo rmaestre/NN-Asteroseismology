@@ -10,6 +10,9 @@ import glob
 import numpy as np
 import pandas as pd
 
+import tensorflow as tf
+
+
 log = logging.getLogger(__name__)
 
 
@@ -18,14 +21,34 @@ class predeltascuti:
     Preprocss class to the eleven delta scuti stars
     """
 
-    def preprocess_files(self, input_folder, output_folder, num_frequencies=30):
+    def __init__(self):
+        """
+        """
+        self.targets = {}
+        self.targets["kic10661783.lis"] = {"dnu": 39.0, "dr": 7.0}
+        self.targets["KIC9851944.lis"] = {"dnu": 26.0, "dr": 5.3}
+        self.targets["HD159561.lis"] = {"dnu": 38.0, "dr": 19.0}
+        self.targets["CID100866999.lis"] = {"dnu": 56, "dr": np.nan}
+        self.targets["HD15082.lis"] = {"dnu": 80.0, "dr": 14.0}
+        self.targets["kic4544587.lis"] = {"dnu": 74.0, "dr": 11.0}
+        self.targets["KIC8262223.lis"] = {"dnu": 77.0, "dr": 7.10}
+        self.targets["HD172189.lis"] = {"dnu": 19.0, "dr": 4.6}
+        self.targets["KIC3858884.lis"] = {"dnu": 19.0, "dr": 1.9}
+        self.targets["CID105906206.lis"] = {"dnu": 20.0, "dr": 2.61}
+        self.targets["KIC10080943.lis"] = {"dnu": 52.0, "dr": 1.7}
+
+    def preprocess_files(
+        self,
+        input_folder,
+        output_folder,
+        num_frequencies=30,
+        output_classes=100,
+        target="dnu",
+    ):
         """
         """
         input_resolution = 0.25
-        input_bins = np.arange(0, 101, input_resolution)
-
-        variable_stars = importr("variableStars")
-        pandas2ri.activate()
+        input_bins = np.arange(-1, 101, input_resolution)
 
         files = glob.glob(input_folder)
         if len(files) == 0:
@@ -41,6 +64,8 @@ class predeltascuti:
                 log.error("Some malformated value in file %s" % file)
                 raise Exception("Some malformated value in file %s" % file)
             # process first N frequencies
+            variable_stars = importr("variableStars")
+            pandas2ri.activate()
             _res = variable_stars.process(
                 df[["freq"]].values,
                 df[["amp"]].values,
@@ -84,15 +109,18 @@ class predeltascuti:
                 statistic="mean",
                 bins=input_bins,
             )
-            # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0])).ravel()
-            line[np.isnan(line)] = 0  # NaN to zeros
-            # get targets
+            # get targets based on filename
             file_name = file.split("/")[-1:][0]
+            # Stak all channels
+            line = np.hstack(
+                (dft[0], hd[0], ac[0], self.targets[file_name]["dnu"])
+            ).ravel()
+            line[np.isnan(line)] = 0  # NaN to zeros
+            line = line[3:]  # drop firsts n values
+
             # Save to disk
             np.savetxt(
                 "%s/%s.log" % (output_folder, file_name.split(".")[0]),
-                line,
+                np.column_stack(line),
                 delimiter=",",
-                newline=" ",
             )
