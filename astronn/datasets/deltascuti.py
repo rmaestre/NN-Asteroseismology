@@ -17,29 +17,14 @@ class deltascuti(Data):
     splitting are provided.
     """
 
-    def __init__(self):
-        self.targets = {}
-        self.targets["kic10661783.lis"] = {"dnu": 39.0, "dr": 7.0}
-        self.targets["KIC9851944.lis"] = {"dnu": 26.0, "dr": 5.3}
-        self.targets["HD159561.lis"] = {"dnu": 38.0, "dr": 19.0}
-        self.targets["CID100866999.lis"] = {"dnu": 56, "dr": np.nan}
-        self.targets["HD15082.lis"] = {"dnu": 80.0, "dr": 14.0}
-        self.targets["kic4544587.lis"] = {"dnu": 74.0, "dr": 11.0}
-        self.targets["KIC8262223.lis"] = {"dnu": 77.0, "dr": 7.10}
-        self.targets["HD172189.lis"] = {"dnu": 19.0, "dr": 4.6}
-        self.targets["KIC3858884.lis"] = {"dnu": 19.0, "dr": 1.9}
-        self.targets["CID105906206.lis"] = {"dnu": 20.0, "dr": 2.61}
-        self.targets["KIC10080943.lis"] = {"dnu": 52.0, "dr": 1.7}
-
-    def load(self, folder):
+    def load(self, folder, batch_size):
         """
         method to load all files from a folder
         """
         # Process each file
-        return self.csv_reader_dataset(glob.glob(folder), batch_size=150)
+        return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-
-    def parse_csv_line(self, line, n_inputs=1626):
+    def parse_csv_line(self, line, n_inputs=1219):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -65,7 +50,7 @@ class deltascuti(Data):
     ):
         """
         """
-        dataset = tf.data.Dataset.list_files()
+        dataset = tf.data.Dataset.list_files(filenames)
         dataset = dataset.repeat()
         dataset = dataset.interleave(
             lambda filename: tf.data.TextLineDataset(filename).skip(0),
