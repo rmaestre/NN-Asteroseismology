@@ -119,8 +119,11 @@ class predeltascuti:
             line = line[3:]  # drop firsts n values
 
             # Save to disk
-            np.savetxt(
-                "%s/%s.log" % (output_folder, file_name.split(".")[0]),
-                np.column_stack(line),
-                delimiter=",",
+            _df = pd.DataFrame(np.column_stack(line))
+            _df.insert(0, "star", file_name.split(".")[0])
+            _df.to_csv(
+                output_folder + file_name.split(".")[0] + ".log",
+                index=False,
+                header=False,
             )
+
