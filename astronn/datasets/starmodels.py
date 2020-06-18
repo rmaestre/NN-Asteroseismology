@@ -12,11 +12,11 @@ class starmodels(Data):
     This class loads all star models generated with CESTAM and FILOU codes
     """
 
-    def load(self, folder):
+    def load(self, folder, batch_size=250):
         """
         method to load all files from a folder
         """
-        return self.csv_reader_dataset(glob.glob(folder), batch_size=150)
+        return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
     def parse_csv_line(self, line, n_inputs=1626):
         """
@@ -29,7 +29,6 @@ class starmodels(Data):
         # Get DFT, HD and AC
         x = tf.stack(tf.split(fields[: 406 * 3], 3), axis=-1)  # Split channels
         # Get Dnu (-1) or dr (-2)
-        print(fields[-1:])
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         y = tf.reshape(tf.one_hot(depth=100, indices=aux, axis=0), (1, 100))
         return x, y
