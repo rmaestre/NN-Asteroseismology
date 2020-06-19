@@ -30,7 +30,11 @@ class starmodels(Data):
         x = tf.stack(tf.split(fields[: 406 * 3], 3), axis=-1)  # Split channels
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
-        y = tf.reshape(tf.one_hot(depth=100, indices=aux, axis=0), (1, 100))
+        # If target value > 100, return 100 as target value
+        y = tf.reshape(
+            tf.one_hot(depth=100, indices=tf.cond(aux < 100, lambda: aux, lambda: 99)),
+            (1, 100),
+        )
         return x, y
 
     def csv_reader_dataset(
