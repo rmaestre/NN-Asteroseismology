@@ -12,6 +12,11 @@ class separableconvnn(Model):
     Main model to work with several channels in asteroseismology
     """
 
+    def top_2_categorical_accuracy(self, y_true, y_pred):
+        return tf.keras.metrics.top_k_categorical_accuracy(
+            tf.reshape(y_true, (1, y_true.shape[1])), y_pred, k=2
+        )
+
     def compile(self, learning_rate):
         """
         load all files on a given directory (and recursive directories)
@@ -22,23 +27,23 @@ class separableconvnn(Model):
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConv1D(
-                    kernel_size=10,
-                    filters=5,
-                    depth_multiplier=3,
+                    kernel_size=5,
+                    filters=10,
+                    depth_multiplier=10,
                     input_shape=(406, 3),
-                    activation="relu",
-                ),
-                layers.SeparableConv1D(
-                    kernel_size=5, filters=5, depth_multiplier=3, activation="relu"
-                ),
-                layers.SeparableConv1D(
-                    kernel_size=2, filters=5, depth_multiplier=3, activation="relu"
+                    activation="selu",
                 ),
                 layers.MaxPool1D(3),
                 layers.BatchNormalization(),
-                layers.Dropout(0.2),
+                layers.Dropout(0.3),
+                layers.SeparableConv1D(
+                    kernel_size=5, filters=10, depth_multiplier=10, activation="selu",
+                ),
+                layers.MaxPool1D(3),
+                layers.BatchNormalization(),
+                layers.Dropout(0.3),
                 layers.Flatten(),
-                layers.Dense(200, activation="relu"),
+                layers.Dense(200, activation="selu"),
                 layers.Dense(100, activation="softmax"),
             ]
         )
@@ -58,7 +63,9 @@ class separableconvnn(Model):
         :rtype: PricingObservation
         """
 
-        history = self.model.fit(dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)
+        history = self.model.fit(
+            dataset, steps_per_epoch=steps_per_epoch, epochs=epochs
+        )
         return history
 
     def predict_classes(self, data):
