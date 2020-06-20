@@ -29,7 +29,7 @@ class separableconvnn(Model):
                 layers.SeparableConv1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=10,
+                    depth_multiplier=3,
                     input_shape=(406, 3),
                     activation="selu",
                 ),
@@ -37,13 +37,12 @@ class separableconvnn(Model):
                 layers.BatchNormalization(),
                 layers.Dropout(0.3),
                 layers.SeparableConv1D(
-                    kernel_size=5, filters=10, depth_multiplier=10, activation="selu",
+                    kernel_size=5, filters=10, depth_multiplier=3, activation="selu",
                 ),
                 layers.MaxPool1D(3),
                 layers.BatchNormalization(),
                 layers.Dropout(0.3),
                 layers.Flatten(),
-                layers.Dense(200, activation="selu"),
                 layers.Dense(100, activation="softmax"),
             ]
         )
