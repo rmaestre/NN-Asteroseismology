@@ -67,14 +67,16 @@ class predeltascuti:
             variable_stars = importr("variableStars")
             pandas2ri.activate()
             _res = variable_stars.process(
-                df[["freq"]].values,
-                df[["amp"]].values,
-                "uniform",
-                0,
-                num_frequencies,
-                0,
-                0,
-                False,
+                frequency=df[["freq"]].values,
+                amplitude=df[["amp"]].values,
+                filter="uniform",
+                gRegimen=0,
+                numFrequencies=num_frequencies,
+                maxDnu=1,
+                minDnu=15,
+                dnuGuessError=False,
+                debug=False,
+                processFirstRangeOnly=num_frequencies,
             )
             # Get first group of processed frequencies
             first_proccesed_freq_name = _res.rx2["fresAmps"].names[0]
@@ -90,7 +92,7 @@ class predeltascuti:
                     _res.rx2["fresAmps"].rx2[str(first_proccesed_freq_name)].rx2["b"],
                     axis=-1,
                 )[0],
-                statistic="mean",
+                statistic="max",
                 bins=input_bins,
             )
             hd = binned_statistic(
@@ -100,13 +102,13 @@ class predeltascuti:
                 np.stack(
                     _res.rx2["diffHistogram"].rx2["histogram"].rx2["values"], axis=-1
                 )[0],
-                statistic="mean",
+                statistic="max",
                 bins=input_bins,
             )
             ac = binned_statistic(
                 np.stack(_res.rx2["crossCorrelation"].rx2["index"], axis=-1)[0],
                 np.stack(_res.rx2["crossCorrelation"].rx2["autocorre"], axis=-1)[0],
-                statistic="mean",
+                statistic="max",
                 bins=input_bins,
             )
             # get targets based on filename
