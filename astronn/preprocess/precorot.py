@@ -105,8 +105,10 @@ class precorot:
             )
             # get targets based on filename
             file_name = file.split("/")[-1:][0]
+            # Info from configuration
+            loggs = self.conf[self.conf.corot == int(file_name.split(".")[0])]["loggs"]
             # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0])).ravel()
+            line = np.hstack((dft[0], hd[0], ac[0], loggs)).ravel()
             line[np.isnan(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
 
