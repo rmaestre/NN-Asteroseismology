@@ -28,20 +28,14 @@ class separableconvnn(Model):
             [
                 layers.SeparableConv1D(
                     kernel_size=5,
-                    filters=10,
+                    filters=20,
                     depth_multiplier=3,
                     input_shape=(406, 3),
                     activation="selu",
                 ),
-                layers.MaxPool1D(3),
+                layers.MaxPool1D(2),
                 layers.BatchNormalization(),
-                layers.Dropout(0.3),
-                layers.SeparableConv1D(
-                    kernel_size=5, filters=10, depth_multiplier=3, activation="selu",
-                ),
-                layers.MaxPool1D(3),
-                layers.BatchNormalization(),
-                layers.Dropout(0.3),
+                layers.Dropout(0.2),
                 layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
