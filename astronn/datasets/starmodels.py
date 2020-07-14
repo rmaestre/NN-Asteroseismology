@@ -18,6 +18,10 @@ class starmodels(Data):
         """
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
+    @tf.function
+    def is_target_in_range(self, tensor):
+        return tf.cond(tensor < 100, True, False)
+
     def parse_csv_line(self, line, n_inputs=1626):
         """
         each file will be parsed with this method. Mainly, we read the
@@ -30,12 +34,10 @@ class starmodels(Data):
         x = tf.stack(tf.split(fields[: 406 * 3], 3), axis=-1)  # Split channels
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
-        # If target value > 100, return 100 as target value
-        y = tf.reshape(
-            tf.one_hot(depth=100, indices=tf.cond(aux < 100, lambda: aux, lambda: 99)),
-            (1, 100),
-        )
-        return x, y
+        # Target to one-hot vector
+        y = tf.reshape(tf.one_hot(depth=100, indices=aux), (1, 100),)
+        # If target value > 100, return False as flag, to be filtered
+        return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
 
     def csv_reader_dataset(
         self,
@@ -55,5 +57,6 @@ class starmodels(Data):
         )
         dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.map(self.parse_csv_line, num_parallel_calls=n_parse_threads)
+        dataset = dataset.filter(lambda x, y, flag: flag) # Filter y_hat targets markes as False
         dataset = dataset.batch(batch_size)
         return dataset.prefetch(1)
