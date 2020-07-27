@@ -27,13 +27,20 @@ class separableconvnn(Model):
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConv1D(
-                    kernel_size=5,
+                    kernel_size=10,
                     filters=20,
-                    depth_multiplier=3,
+                    depth_multiplier=10,
                     input_shape=(406, 3),
                     activation="selu",
                 ),
-                layers.MaxPool1D(2),
+                layers.SeparableConv1D(
+                    kernel_size=10,
+                    filters=20,
+                    depth_multiplier=10,
+                    input_shape=(406, 3),
+                    activation="selu",
+                ),
+                layers.AveragePooling1D(2),
                 layers.BatchNormalization(),
                 layers.Dropout(0.2),
                 layers.Flatten(),
