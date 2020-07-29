@@ -39,15 +39,8 @@ class corot(Data):
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
         x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
-        # Get Dnu (-1) or dr (-2)
-        y = tf.reshape(
-            tf.one_hot(
-                depth=100,
-                indices=tf.cast(tf.convert_to_tensor(fields[-1:]), tf.int32),
-                axis=0,
-            ),
-            (1, 100),
-        )
+        # Get Logg
+        y = fields[-1:]
         return fields[0], x, y
 
     def csv_reader_dataset(

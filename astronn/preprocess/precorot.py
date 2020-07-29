@@ -44,7 +44,7 @@ class precorot:
 
         files = glob.glob(input_folder)
         if len(files) == 0:
-            log.warning("Input folder %s is empty!" % folder)
+            log.warning("Input folder %s is empty!" % input_folder)
         for file in glob.glob(input_folder):
             log.info("Processing frequencies and amplitudes os star %s" % file)
             # read frequency of a given star
@@ -109,7 +109,7 @@ class precorot:
             loggs = self.conf[self.conf.corot == int(file_name.split(".")[0])]["loggs"]
             # Stak all channels
             line = np.hstack((dft[0], hd[0], ac[0], loggs)).ravel()
-            line[np.isnan(line)] = 0  # NaN to zeros
+            line[pd.isnull(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
 
             # Save to disk
