@@ -35,7 +35,21 @@ class separableconvnn(Model):
                 ),
                 layers.SeparableConv1D(
                     kernel_size=10,
-                    filters=20,
+                    filters=10,
+                    depth_multiplier=10,
+                    input_shape=(406, 3),
+                    activation="selu",
+                ),
+                layers.SeparableConv1D(
+                    kernel_size=10,
+                    filters=5,
+                    depth_multiplier=10,
+                    input_shape=(406, 3),
+                    activation="selu",
+                ),
+                layers.SeparableConv1D(
+                    kernel_size=10,
+                    filters=2,
                     depth_multiplier=10,
                     input_shape=(406, 3),
                     activation="selu",
