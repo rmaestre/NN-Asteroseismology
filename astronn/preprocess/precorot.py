@@ -18,7 +18,8 @@ log = logging.getLogger(__name__)
 
 class precorot:
     """
-    Preprocss class to the eleven delta scuti stars
+    Preprocss class to the 77 sample CoRoT stars. We also load an independent estimation of
+    logg from Hareter, 2013.
     """
 
     def __init__(self, conf_file, cols):

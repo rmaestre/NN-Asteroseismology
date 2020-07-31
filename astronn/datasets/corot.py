@@ -11,10 +11,9 @@ import tensorflow as tf
 
 class corot(Data):
     """
-    This class loads eleven delta scuti stars that have been
-    well studied before from an asteroseismology point of
-    view. Thus values of large separation and rotational
-    splitting are provided.
+    This class loads 77 CoRot stars that have been
+    well studied in Paparo et.al. 2016.
+    https://www.osti.gov/pages/biblio/1304837
     """
 
     def load(self, folder, batch_size):
@@ -39,7 +38,7 @@ class corot(Data):
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
         x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
-        # Get Logg
+        # Get Logg provided in Hareter, 2013
         y = fields[-1:]
         return fields[0], x, y
 
