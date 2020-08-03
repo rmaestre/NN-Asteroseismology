@@ -28,39 +28,25 @@ class separableconvnn(Model):
             [
                 layers.SeparableConv1D(
                     kernel_size=10,
-                    filters=20,
-                    depth_multiplier=10,
+                    filters=10,
+                    depth_multiplier=5,
                     input_shape=(406, 3),
                     activation="selu",
                     strides=2,
                 ),
-                layers.AveragePooling1D(2),
-                layers.BatchNormalization(),
-                layers.Dropout(0.2),
                 layers.SeparableConv1D(
                     kernel_size=10,
                     filters=10,
-                    depth_multiplier=10,
+                    depth_multiplier=5,
                     input_shape=(406, 3),
                     activation="selu",
                     strides=2,
                 ),
                 layers.AveragePooling1D(2),
                 layers.BatchNormalization(),
-                layers.Dropout(0.2),
-                layers.SeparableConv1D(
-                    kernel_size=10,
-                    filters=5,
-                    depth_multiplier=10,
-                    input_shape=(406, 3),
-                    activation="selu",
-                    strides=2,
-                ),
-                layers.AveragePooling1D(2),
-                layers.BatchNormalization(),
-                layers.Dropout(0.2),
+                layers.Dropout(0.3),
                 layers.Flatten(),
-                layers.Dense(100, activation="softmax")
+                layers.Dense(100, activation="softmax"),
             ]
         )
         opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
