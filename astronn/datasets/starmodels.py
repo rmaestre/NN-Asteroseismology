@@ -35,7 +35,7 @@ class starmodels(Data):
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         # Target to one-hot vector
-        y = tf.reshape(tf.one_hot(depth=100, indices=aux), (1, 100),)
+        y = tf.keras.backend.flatten(tf.one_hot(depth=100, indices=aux))
         # If target value > 100, return False as flag, to be filtered
         return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
 
