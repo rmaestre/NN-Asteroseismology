@@ -108,14 +108,16 @@ class precorot:
             file_name = file.split("/")[-1:][0]
             # Info from configuration
             loggs = self.conf[self.conf.corot == int(file_name.split(".")[0])]["loggs"]
+            l = self.conf[self.conf.corot == int(file_name.split(".")[0])]["l"]
             # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0], loggs)).ravel()
+            line = np.hstack((dft[0], hd[0], ac[0], loggs, l)).ravel()
             line[pd.isnull(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
 
             # Save to disk
             _df = pd.DataFrame(np.column_stack(line))
             _df.insert(0, "star", file_name.split(".")[0])
+            
             _df.to_csv(
                 output_folder + file_name.split(".")[0] + ".log",
                 index=False,
