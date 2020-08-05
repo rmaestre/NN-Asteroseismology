@@ -38,7 +38,16 @@ class deltascuti(Data):
         # Read fields
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
-        x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
+        # In this case, vector stars at position 1 because in position 0 is the starID
+        dft = fields[1 : 406 + 1]
+        hod = fields[406 + 1 : (406 * 2) + 1]
+        hod = tf.math.divide(
+            tf.subtract(hod, tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
+        )
+        ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
+        # x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(

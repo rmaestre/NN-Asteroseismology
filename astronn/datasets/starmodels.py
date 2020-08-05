@@ -31,7 +31,29 @@ class starmodels(Data):
         defs = [tf.constant(np.nan)] * n_inputs
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
-        x = tf.stack(tf.split(fields[: 406 * 3], 3), axis=-1)  # Split channels
+        dft = fields[0:406]
+        hod = fields[406 : 406 * 2]
+        hod = tf.math.divide(
+            tf.subtract(hod, tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
+        )
+        ac = fields[406 * 2 : 406 * 3]
+
+        # Random noise on one random channel [test on training]
+        """
+        select = np.random.choice(3, 1, replace=False)
+        if select== 0:
+            dft += np.random.normal(0, 1, len(dft))
+            dft = dft.tolist()
+        elif select == 1:
+            hod += np.random.normal(0, 1, len(hod))
+            hod = hod.tolist()
+        elif select ==2:
+            ac += np.random.normal(0, 1, len(ac))
+            ac = ac.tolist()
+        """
+
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         # Target to one-hot vector
@@ -57,6 +79,8 @@ class starmodels(Data):
         )
         dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.map(self.parse_csv_line, num_parallel_calls=n_parse_threads)
-        dataset = dataset.filter(lambda x, y, flag: flag) # Filter y_hat targets markes as False
+        dataset = dataset.filter(
+            lambda x, y, flag: flag
+        )  # Filter y_hat targets markes as False
         dataset = dataset.batch(batch_size)
         return dataset.prefetch(1)
