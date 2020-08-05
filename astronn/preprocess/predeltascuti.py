@@ -33,7 +33,7 @@ class predeltascuti:
         self.targets["kic4544587.lis"] = {"dnu": 74.0, "dr": 11.0}
         self.targets["KIC8262223.lis"] = {"dnu": 77.0, "dr": 7.10}
         self.targets["HD172189.lis"] = {"dnu": 19.0, "dr": 4.6}
-        self.targets["KIC3858884.lis"] = {"dnu": 19.0, "dr": 1.9}
+        self.targets["KIC3858884.lis"] = {"dnu": 29.0, "dr": 1.9}
         self.targets["CID105906206.lis"] = {"dnu": 20.0, "dr": 2.61}
         self.targets["KIC10080943.lis"] = {"dnu": 52.0, "dr": 1.7}
 
