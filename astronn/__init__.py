@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+import tensorflow as tf
 
 class Data(ABC):
     """
@@ -15,6 +15,15 @@ class Data(ABC):
         :rtype: PricingObservation
         """
         pass
+
+    def normalize(self, tensor):
+        """
+        normalize vector between 0,1
+        """
+        return tf.math.divide(
+            tf.subtract(tensor, tf.reduce_min(tensor)),
+            tf.subtract(tf.reduce_max(tensor), tf.reduce_min(tensor)),
+        )
 
 
 class Model(ABC):
