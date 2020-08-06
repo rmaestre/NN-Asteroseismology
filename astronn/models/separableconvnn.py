@@ -46,7 +46,6 @@ class separableconvnn(Model):
                 layers.BatchNormalization(),
                 layers.Dropout(0.3),
                 layers.Flatten(),
-                layers.Dense(200, activation="selu"),
                 layers.Dense(100, activation="softmax"),
             ]
         )
