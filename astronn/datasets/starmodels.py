@@ -12,10 +12,11 @@ class starmodels(Data):
     This class loads all star models generated with CESTAM and FILOU codes
     """
 
-    def load(self, folder, batch_size=250):
+    def load(self, folder, batch_size=250, add_noise=False):
         """
         method to load all files from a folder
         """
+        self.add_noise = add_noise
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
     @tf.function
@@ -33,25 +34,42 @@ class starmodels(Data):
         # Get DFT, HD and AC
         dft = fields[0:406]
         hod = fields[406 : 406 * 2]
-        hod = tf.math.divide(
-            tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
-        )
         ac = fields[406 * 2 : 406 * 3]
 
-        # Random noise on one random channel [test on training]
-        """
-        select = np.random.choice(3, 1, replace=False)
-        if select== 0:
-            dft += np.random.normal(0, 1, len(dft))
-            dft = dft.tolist()
-        elif select == 1:
-            hod += np.random.normal(0, 1, len(hod))
-            hod = hod.tolist()
-        elif select ==2:
-            ac += np.random.normal(0, 1, len(ac))
-            ac = ac.tolist()
-        """
+        # Random noise on random channels [test on training]
+        if self.add_noise:
+            dft = tf.cond(
+                tf.random.uniform([], 0, 1) < 0.5,
+                lambda: dft
+                + tf.random.normal(
+                    shape=tf.shape(dft), mean=dft, stddev=0.2, dtype=tf.float32
+                ),
+                lambda: tf.convert_to_tensor(dft),
+            )
+
+            hod = tf.cond(
+                tf.random.uniform([], 0, 1) < 0.5,
+                lambda: hod
+                + tf.random.normal(
+                    shape=tf.shape(hod), mean=hod, stddev=0.2, dtype=tf.float32
+                ),
+                lambda: tf.convert_to_tensor(hod),
+            )
+
+            ac = tf.cond(
+                tf.random.uniform([], 0, 1) < 0.5,
+                lambda: ac
+                + tf.random.normal(
+                    shape=tf.shape(ac), mean=ac, stddev=0.2, dtype=tf.float32
+                ),
+                lambda: tf.convert_to_tensor(ac),
+            )
+
+        # Normalizar HoD between 0,1
+        hod = tf.math.divide(
+            tf.subtract(hod, tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod)*2, tf.reduce_min(hod)),
+         )
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)
