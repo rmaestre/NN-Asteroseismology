@@ -37,39 +37,46 @@ class starmodels(Data):
         ac = fields[406 * 2 : 406 * 3]
 
         # Random noise on random channels [test on training]
+        def add_noise_positive(x):
+            """
+            Apply gaussian noise on signal when this noise
+            is in the range [0,1], if not in range we keep
+            the original signal level without noise.
+            """
+            x_noise = tf.random.normal(
+                shape=tf.shape(x),
+                mean=x,
+                stddev=tf.random.uniform([], 0, 0.5),  # Random stddev [0,0.5]
+                dtype=tf.float32,
+            )
+            # Noise is valid when is >=0 and <=1.0
+            mask = tf.cast((x_noise >= 0.0) & (x_noise <= 1.0), dtype=tf.float32)
+            return x + (x_noise * mask)  # Apply mask
+
         if self.add_noise:
             dft = tf.cond(
-                tf.random.uniform([], 0, 1) < 0.5,
-                lambda: dft
-                + tf.random.normal(
-                    shape=tf.shape(dft), mean=dft, stddev=0.2, dtype=tf.float32
-                ),
+                tf.random.uniform([], 0, 1) > 0.0,
+                lambda: add_noise_positive(dft),
                 lambda: tf.convert_to_tensor(dft),
             )
 
             hod = tf.cond(
-                tf.random.uniform([], 0, 1) < 0.5,
-                lambda: hod
-                + tf.random.normal(
-                    shape=tf.shape(hod), mean=hod, stddev=0.2, dtype=tf.float32
-                ),
+                tf.random.uniform([], 0, 1) > 0.0,
+                lambda: add_noise_positive(hod),
                 lambda: tf.convert_to_tensor(hod),
             )
 
             ac = tf.cond(
-                tf.random.uniform([], 0, 1) < 0.5,
-                lambda: ac
-                + tf.random.normal(
-                    shape=tf.shape(ac), mean=ac, stddev=0.2, dtype=tf.float32
-                ),
+                tf.random.uniform([], 0, 1) > 0.0,
+                lambda: add_noise_positive(ac),
                 lambda: tf.convert_to_tensor(ac),
             )
 
         # Normalizar HoD between 0,1
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod)*2, tf.reduce_min(hod)),
-         )
+            tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
+        )
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)
