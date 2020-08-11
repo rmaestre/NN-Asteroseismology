@@ -46,7 +46,7 @@ class starmodels(Data):
             x_noise = tf.random.normal(
                 shape=tf.shape(x),
                 mean=x,
-                stddev=tf.random.uniform([], 0, 0.5),  # Random stddev [0,0.5]
+                stddev=tf.random.uniform([], 0, 0.2),  # Random stddev [0,0.2]
                 dtype=tf.float32,
             )
             # Noise is valid when is >=0 and <=1.0
@@ -72,11 +72,14 @@ class starmodels(Data):
                 lambda: tf.convert_to_tensor(ac),
             )
 
-        # Normalizar HoD between 0,1
+        # Normalized HoD between 0,1
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
             tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
         )
+
+        # Drop first values on AC
+        ac = tf.minimum(ac, 1)
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)
