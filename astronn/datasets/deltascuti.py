@@ -44,10 +44,11 @@ class deltascuti(Data):
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
             tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
-        )
         ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
-        # x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
+        # Remove firsts AC values
+        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(

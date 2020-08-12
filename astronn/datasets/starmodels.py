@@ -78,8 +78,12 @@ class starmodels(Data):
             tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
         )
 
-        # Drop first values on AC
+        # Remove first AC values
+        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+        # Normalized AC values up to 1
         ac = tf.minimum(ac, 1)
+        hod = tf.minimum(hod, 1)
+        dft = tf.minimum(dft, 1)
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)

@@ -37,7 +37,7 @@ class corot(Data):
         # Read fields
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
-        # In this case, vector stars at position 1 because in position 0 is the starID
+        # In this case, signal starts at position 1 because in position 0 is the starID
         dft = fields[1 : 406 + 1]
         hod = fields[406 + 1 : (406 * 2) + 1]
         hod = tf.math.divide(
@@ -45,11 +45,13 @@ class corot(Data):
             tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
         ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
-        #x = tf.stack(tf.split(fields[1 : (406 * 3) + 1], 3), axis=-1)  # Split channels
+        # Remove firsts AC values
+        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
         # Get Logg provided in Hareter, 2013
         loggs = fields[1219]
-        # Get Luminosity provided in Paparo, 201X
+        # Get Luminosity provided in Paparo, 2016
         l = fields[1220]
         return fields[0], x, loggs, l
 
