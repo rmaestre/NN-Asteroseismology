@@ -41,9 +41,11 @@ class deltascuti(Data):
         # In this case, vector stars at position 1 because in position 0 is the starID
         dft = fields[1 : 406 + 1]
         hod = fields[406 + 1 : (406 * 2) + 1]
+        # Normalize HoD
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
+        )
         ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
         # Remove firsts AC values
         ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))

@@ -77,8 +77,7 @@ class starmodels(Data):
             tf.subtract(hod, tf.reduce_min(hod)),
             tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
         )
-
-        # Remove first AC values
+        # Remove firsts AC values
         ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
         # Normalized AC values up to 1
         ac = tf.minimum(ac, 1)
