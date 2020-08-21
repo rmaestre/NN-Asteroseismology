@@ -9,4 +9,5 @@ tensorflow==1.13.1
 matplotlib==3.2.1
 shap==0.35.0
 gast==0.2.2
+alibi
 pygam
