@@ -31,7 +31,7 @@ class separableconvnn(Model):
                     filters=10,
                     depth_multiplier=10,
                     input_shape=(406, 3),
-                    activation="relu",
+                    activation="selu",
                     strides=1
                 ),
                 layers.BatchNormalization(),
@@ -41,7 +41,7 @@ class separableconvnn(Model):
                     filters=10,
                     depth_multiplier=10,
                     input_shape=(406, 3),
-                    activation="relu",
+                    activation="selu",
                     strides=1
                 ),
                 layers.BatchNormalization(),
@@ -51,8 +51,8 @@ class separableconvnn(Model):
                     filters=10,
                     depth_multiplier=10,
                     input_shape=(406, 3),
-                    activation="relu",
-                    strides=2
+                    activation="selu",
+                    strides=1
                 ),
                 layers.BatchNormalization(),
                 layers.MaxPool1D(2),
