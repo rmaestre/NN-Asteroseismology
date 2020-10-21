@@ -39,14 +39,19 @@ class prebedding:
         """
         input_resolution = 0.25
         input_bins = np.arange(-1, 101, input_resolution)
-
         files = glob.glob(input_folder)
         if len(files) == 0:
             log.warning("Input folder %s is empty!" % input_folder)
         for file in glob.glob(input_folder):
             log.info("Processing frequencies and amplitudes os star %s" % file)
             # read frequency of a given star
-            df = pd.read_csv(file, sep="\s+",header=None, index_col=False, names=["f", "signif", "a", "V4", "V5", "V6", "V7"])
+            df = pd.read_csv(
+                file,
+                sep="\s+",
+                header=None,
+                index_col=False,
+                names=["f", "signif", "a", "V4", "V5", "V6", "V7"],
+            )
             # Check for NaN values
             if df.isnull().values.any():
                 log.error("Some malformated value in file %s" % file)
@@ -55,7 +60,7 @@ class prebedding:
             variable_stars = importr("variableStars")
             pandas2ri.activate()
             _res = variable_stars.process(
-                frequency=df[["V4"]].values,
+                frequency=df[["f"]].values,
                 amplitude=df[["a"]].values,
                 filter="uniform",
                 gRegimen=0,
@@ -109,7 +114,7 @@ class prebedding:
             # Save to disk
             _df = pd.DataFrame(np.column_stack(line))
             _df.insert(0, "star", file_name.split(".")[0])
-            
+
             _df.to_csv(
                 output_folder + file_name.split(".")[0] + ".log",
                 index=False,
