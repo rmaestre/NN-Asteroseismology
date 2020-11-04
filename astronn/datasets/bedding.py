@@ -21,7 +21,7 @@ class bedding(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1219):
+    def parse_csv_line(self, line, n_inputs=1220):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -45,7 +45,7 @@ class bedding(Data):
         )
         ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
         # Remove firsts AC values
-        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
         # Get Dnu (-1) or dr (-2)
@@ -57,7 +57,10 @@ class bedding(Data):
             ),
             (1, 100),
         )
-        return fields[0], x, y
+        # get DNU from bedding's paper 2020
+        dnu = fields[1219]
+        # return values
+        return fields[0], x, y, dnu
 
     def csv_reader_dataset(
         self, filenames, batch_size=32, n_parse_threads=5, n_readers=5,
