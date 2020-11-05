@@ -168,10 +168,10 @@ output_dir = "/home/roberto/Downloads/evolutionTracks_line/"
 filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 
 # Iterative approach only for debug purpose
-#for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-#   process_file(file)
+for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+   process_file(file)
 
-with Pool(8) as p:
-    p.map(
-        process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
-    )
+#with Pool(8) as p:
+#    p.map(
+#        process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
+#    )
