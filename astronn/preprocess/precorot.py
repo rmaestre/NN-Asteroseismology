@@ -108,9 +108,10 @@ class precorot:
             file_name = file.split("/")[-1:][0]
             # Info from configuration
             loggs = self.conf[self.conf.corot == int(file_name.split(".")[0])]["loggs"]
+            teff = self.conf[self.conf.corot == int(file_name.split(".")[0])]["teff"]
             l = self.conf[self.conf.corot == int(file_name.split(".")[0])]["l"]
             # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0], loggs, l)).ravel()
+            line = np.hstack((dft[0], hd[0], ac[0], loggs, teff, l)).ravel()
             line[pd.isnull(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
 
