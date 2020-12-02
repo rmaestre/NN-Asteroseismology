@@ -29,17 +29,15 @@ class separableconvnn(Model):
                 layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=5,
+                    depth_multiplier=1,
                     input_shape=(406, 3),
                     activation="relu",
                     strides=1
                 ),
-                layers.MaxPool1D(2),
-                layers.Dropout(0.2),
                 layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=5,
+                    depth_multiplier=1,
                     input_shape=(406, 3),
                     activation="relu",
                     strides=1
