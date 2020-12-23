@@ -24,7 +24,8 @@ def process_file(
     a single line file with the next format:
     n\tl\tm\tvalue ....
     """
-    if np.random.binomial(1,0.5) == 1:
+    # if np.random.binomial(1,0.5) == 1:
+    if True:
         line_out = []
         dirname_output = path.split("/")[-2]
         filename_ouput = path.split("/")[-1]
@@ -40,7 +41,7 @@ def process_file(
                         freq = float(chunks[3])
                         no = int(chunks[5])
                         freq *= 0.0864  # to muHZ
-                        if n > 0 and n < 10 and l < 3:
+                        if n >= 0 and n < 10 and l < 3:
                             line_out.append(n)
                             line_out.append(l)
                             line_out.append(m)
@@ -58,7 +59,8 @@ def process_file(
             )
         else:
             print(
-                "Procesed %d freqs (keeping only %d)" % (len(line_out), MAX_FREQS_PROCESSED)
+                "Procesed %d freqs (keeping only %d)"
+                % (len(line_out), MAX_FREQS_PROCESSED)
             )
             # Process
             x = np.asarray(line_out).reshape(-1, 5)
@@ -66,22 +68,22 @@ def process_file(
             df.columns = ["n", "l", "m", "freq", "no"]
             # Group frequencies by l and m modes and calculate grouped means
             aux = []
-            means = []
-            values = df.query('n>2 & n<8').groupby(["l", "m"])["freq"].diff()
+            medians = []
+            values = df.query("n>=2 & n<=8").groupby(["l", "m"])["freq"].diff()
             for value in values:
                 if not np.isnan(value):
                     aux.append(value)
                 else:
                     if len(aux) > 0:
-                        means.append(np.mean(aux))
+                        medians.append(np.median(aux))
                     aux = []
             # calculate dnu
-            dnu = np.median(means)
+            dnu = np.mean(medians)
             # Convert to one-hot vector
             oh = np.zeros(100)
             oh[int(np.round(dnu))] = 1
-                
-            for i in range(4):
+
+            for i in range(3):
                 # Process signals
                 input_resolution = 0.25
                 input_bins = np.arange(-1, 101, input_resolution)
@@ -89,11 +91,28 @@ def process_file(
                 variable_stars = importr("variableStars")
                 pandas2ri.activate()
 
-                np.random.shuffle(x)
-                
+                def apply_visibilities(row):
+                    """
+                    """
+                    if row["l"] == 0:
+                        return np.random.uniform(1, 0.85)
+                    elif row["l"] == 1:
+                        return np.random.uniform(0.85, 0.7)
+                    elif row["l"] == 2:
+                        return np.random.uniform(0.7, 0.4)
+                    elif row["l"] == 3:
+                        return np.random.uniform(0.4, 0.0)
+
+                x_vis = df.apply(apply_visibilities, axis=1)
+                if "vis" in df.columns:
+                    df = df.drop(["vis"], axis=1)  # Remove vis column if exists
+                df = x_vis.to_frame().join(df)
+                df.columns = ["vis", "n", "l", "m", "freq", "no"]
+                df_sorted = df.sort_values("vis", ascending=False).head(30)
+
                 _res = variable_stars.process(
-                    frequency=x[:,3],
-                    amplitude=np.random.uniform(0,1,len(x)),
+                    frequency=df_sorted["freq"],
+                    amplitude=df_sorted["vis"],
                     filter="uniform",
                     gRegimen=0,
                     numFrequencies=30,
@@ -114,7 +133,9 @@ def process_file(
                         axis=-1,
                     )[0],
                     np.stack(
-                        _res.rx2["fresAmps"].rx2[str(first_proccesed_freq_name)].rx2["b"],
+                        _res.rx2["fresAmps"]
+                        .rx2[str(first_proccesed_freq_name)]
+                        .rx2["b"],
                         axis=-1,
                     )[0],
                     statistic="max",
@@ -125,7 +146,8 @@ def process_file(
                         _res.rx2["diffHistogram"].rx2["histogram"].rx2["bins"], axis=-1
                     )[0],
                     np.stack(
-                        _res.rx2["diffHistogram"].rx2["histogram"].rx2["values"], axis=-1
+                        _res.rx2["diffHistogram"].rx2["histogram"].rx2["values"],
+                        axis=-1,
                     )[0],
                     statistic="max",
                     bins=input_bins,
@@ -151,12 +173,22 @@ def process_file(
                 line[pd.isnull(line)] = 0  # NaN to zeros
                 line = line[3:]  # drop firsts n values
 
+                # import matplotlib.pyplot as plt
+                # plt.plot(np.around(ac[0], 3))
+                # plt.plot(np.around(dft[0], 3))
+                # plt.plot(np.around(hd[0], 3))
+                # plt.savefig("drop.png")
+
                 # Save to disk
                 _df = pd.DataFrame(np.column_stack(line))
                 # _df.insert(0, "star", file_name.split(".")[0])
                 # Save data to file
                 _df.to_csv(
-                    output_dir + dirname_output + "/" + file_name.split(".")[0] + ".log",
+                    output_dir
+                    + dirname_output
+                    + "/"
+                    + file_name.split(".")[0]
+                    + ".log",
                     index=False,
                     header=False,
                     mode="a",
@@ -167,11 +199,15 @@ def process_file(
 output_dir = "/home/roberto/Downloads/evolutionTracks_line/"
 filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 
-# Iterative approach only for debug purpose
-for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-   process_file(file)
+# process_file(
+#    "/home/roberto/Downloads/evolutionTracks/FILOU/VO-m220fe-4a164o0rotjpzt5p7-ad/00489-m220fe-4a164o0rotjpzt5p7-ad.frq"
+# )
 
-#with Pool(8) as p:
-#    p.map(
-#        process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
-#    )
+# Iterative approach only for debug purpose
+#for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+#    process_file(file)
+
+with Pool(8) as p:
+    p.map(
+        process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
+    )
