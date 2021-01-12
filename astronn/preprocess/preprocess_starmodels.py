@@ -3,6 +3,7 @@ import os
 import shutil
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from multiprocessing import Pool
 from itertools import product
@@ -16,7 +17,7 @@ from rpy2.robjects import pandas2ri, numpy2ri
 
 def process_file(
     path,
-    output_dir="/home/roberto/Downloads/evolutionTracks_line/",
+    output_dir="/home/roberto/Downloads/evolutionTracks_line_noisy/",
     MAX_FREQS_PROCESSED=30,
 ):
     """
@@ -83,7 +84,7 @@ def process_file(
             oh = np.zeros(100)
             oh[int(np.round(dnu))] = 1
 
-            for i in range(3):
+            for i in range(5):
                 # Process signals
                 input_resolution = 0.25
                 input_bins = np.arange(-1, 101, input_resolution)
@@ -109,6 +110,8 @@ def process_file(
                 df = x_vis.to_frame().join(df)
                 df.columns = ["vis", "n", "l", "m", "freq", "no"]
                 df_sorted = df.sort_values("vis", ascending=False).head(30)
+                # Add gaussian noise to all Ls
+                df_sorted["freq"] = np.random.normal(df_sorted['freq'], 1)
 
                 _res = variable_stars.process(
                     frequency=df_sorted["freq"],
@@ -173,7 +176,6 @@ def process_file(
                 line[pd.isnull(line)] = 0  # NaN to zeros
                 line = line[3:]  # drop firsts n values
 
-                #import matplotlib.pyplot as plt
                 #plt.figure()
                 #plt.plot(np.around(ac[0], 3))
                 #plt.plot(np.around(dft[0], 3))
@@ -198,17 +200,17 @@ def process_file(
 
 
 # Output dir to save all models
-output_dir = "/home/roberto/Downloads/evolutionTracks_line/"
 filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 
 # process_file(
 #    "/home/roberto/Downloads/evolutionTracks/FILOU/VO-m220fe-4a164o0rotjpzt5p7-ad/00489-m220fe-4a164o0rotjpzt5p7-ad.frq"
 # )
 
+
 # Iterative approach only for debug purpose
-for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-    process_file(file)
-    0/0
+#for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+#    process_file(file)
+#    0/0
 
 with Pool(8) as p:
     p.map(
