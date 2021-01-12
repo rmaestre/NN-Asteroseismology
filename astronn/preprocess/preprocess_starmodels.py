@@ -173,11 +173,13 @@ def process_file(
                 line[pd.isnull(line)] = 0  # NaN to zeros
                 line = line[3:]  # drop firsts n values
 
-                # import matplotlib.pyplot as plt
-                # plt.plot(np.around(ac[0], 3))
-                # plt.plot(np.around(dft[0], 3))
-                # plt.plot(np.around(hd[0], 3))
-                # plt.savefig("drop.png")
+                #import matplotlib.pyplot as plt
+                #plt.figure()
+                #plt.plot(np.around(ac[0], 3))
+                #plt.plot(np.around(dft[0], 3))
+                #plt.plot(np.around(hd[0], 3))
+                #plt.show()
+                #plt.savefig("drop_"+str(i)+".png")
 
                 # Save to disk
                 _df = pd.DataFrame(np.column_stack(line))
@@ -204,8 +206,9 @@ filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 # )
 
 # Iterative approach only for debug purpose
-#for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-#    process_file(file)
+for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+    process_file(file)
+    0/0
 
 with Pool(8) as p:
     p.map(

@@ -23,7 +23,7 @@ class starmodels(Data):
     def is_target_in_range(self, tensor):
         return tf.cond(tensor < 100, True, False)
 
-    def parse_csv_line(self, line, n_inputs=1626):
+    def parse_csv_line(self, line, n_inputs=1219):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 

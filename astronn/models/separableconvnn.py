@@ -27,9 +27,26 @@ class separableconvnn(Model):
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConvolution1D(
+                    kernel_size=10,
+                    filters=10,
+                    depth_multiplier=10,
+                    input_shape=(406, 3),
+                    activation="relu",
+                    strides=1
+                ),
+                layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
                     depth_multiplier=1,
+                    input_shape=(406, 3),
+                    activation="relu",
+                    strides=1
+                ),
+                layers.MaxPool1D(2),
+                layers.SeparableConvolution1D(
+                    kernel_size=10,
+                    filters=10,
+                    depth_multiplier=10,
                     input_shape=(406, 3),
                     activation="relu",
                     strides=1
