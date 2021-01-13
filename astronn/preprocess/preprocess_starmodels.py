@@ -15,6 +15,24 @@ from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri, numpy2ri
 
 
+"""
+One all evolution tracks are generated; we use the next commands to generate a splitted
+batch of them, in order to be processed by tf.Datasets
+
+# all files to one file 
+find . -name "*.log" -exec cat '{}' ';' > allevolution_tracks.out
+
+# Create dir and split big file
+mkdir parts
+mv allevolution_tracks.out parts
+cd parts
+
+# split big file into multiple ones, using 1000 lines per file
+split -l 1000 allevolution_tracks.out
+rm allevolution_tracks.out
+
+"""
+
 def process_file(
     path,
     output_dir="/home/roberto/Downloads/evolutionTracks_line_noisy/",
@@ -208,9 +226,10 @@ filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 
 
 # Iterative approach only for debug purpose
-#for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-#    process_file(file)
-#    0/0
+for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+    print(file)
+    process_file(file)
+    0/0
 
 with Pool(8) as p:
     p.map(
