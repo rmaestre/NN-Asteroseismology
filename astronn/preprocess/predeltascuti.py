@@ -25,17 +25,17 @@ class predeltascuti:
         """
         """
         self.targets = {}
-        self.targets["kic10661783.lis"] = {"dnu": 39.0, "dr": 7.0}
-        self.targets["KIC9851944.lis"] = {"dnu": 26.0, "dr": 5.3}
-        self.targets["HD159561.lis"] = {"dnu": 38.0, "dr": 19.0}
-        self.targets["CID100866999.lis"] = {"dnu": 56, "dr": np.nan}
-        self.targets["HD15082.lis"] = {"dnu": 80.0, "dr": 14.0}
-        self.targets["kic4544587.lis"] = {"dnu": 74.0, "dr": 11.0}
-        self.targets["KIC8262223.lis"] = {"dnu": 77.0, "dr": 7.10}
-        self.targets["HD172189.lis"] = {"dnu": 19.0, "dr": 4.6}
-        self.targets["KIC3858884.lis"] = {"dnu": 29.0, "dr": 1.9}
-        self.targets["CID105906206.lis"] = {"dnu": 20.0, "dr": 2.61}
-        self.targets["KIC10080943.lis"] = {"dnu": 52.0, "dr": 1.7}
+        self.targets["kic10661783.lis"] = {"dnu": 39.0, "dr": 7.0, "L": 29.30}
+        self.targets["KIC9851944.lis"] = {"dnu": 26.0, "dr": 5.3, "L": 60.06}
+        self.targets["HD159561.lis"] = {"dnu": 38.0, "dr": 19.0, "L": 24.64}
+        self.targets["CID100866999.lis"] = {"dnu": 56, "dr": np.nan, "L": 3.86}
+        self.targets["HD15082.lis"] = {"dnu": 80.0, "dr": 14.0, "L": 6.14}
+        self.targets["kic4544587.lis"] = {"dnu": 74.0, "dr": 11.0, "L": 6.47}
+        self.targets["KIC8262223.lis"] = {"dnu": 77.0, "dr": 7.10, "L": 5.13}
+        self.targets["HD172189.lis"] = {"dnu": 19.0, "dr": 4.6, "L": 29.94}
+        self.targets["KIC3858884.lis"] = {"dnu": 29.0, "dr": 1.9, "L": 21.52}
+        self.targets["CID105906206.lis"] = {"dnu": 20.0, "dr": 2.61, "L": 9.39}
+        self.targets["KIC10080943.lis"] = {"dnu": 52.0, "dr": 1.7, "L": 7.08}
 
     def preprocess_files(
         self,
@@ -113,9 +113,10 @@ class predeltascuti:
             )
             # get targets based on filename
             file_name = file.split("/")[-1:][0]
+
             # Stak all channels
             line = np.hstack(
-                (dft[0], hd[0], ac[0], self.targets[file_name]["dnu"])
+                (dft[0], hd[0], ac[0], self.targets[file_name]["L"], self.targets[file_name]["dnu"])
             ).ravel()
             line[np.isnan(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
