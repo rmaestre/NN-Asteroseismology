@@ -200,8 +200,8 @@ def process_file(
                         np.around(dft[0], 3),
                         np.around(hd[0], 3),
                         np.around(ac[0], 3),
-                        np.around(dnu, 3),
                         np.around(Lum, 3),
+                        np.around(dnu, 3)
                     )
                 ).ravel()
                 line[pd.isnull(line)] = 0  # NaN to zeros
