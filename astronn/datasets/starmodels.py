@@ -23,7 +23,7 @@ class starmodels(Data):
     def is_target_in_range(self, tensor):
         return tf.cond(tensor < 100, True, False)
 
-    def parse_csv_line(self, line, n_inputs=1219):
+    def parse_csv_line(self, line, n_inputs=1220):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -84,11 +84,17 @@ class starmodels(Data):
         hod = tf.minimum(hod, 1)
         dft = tf.minimum(dft, 1)
 
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
-        # Get Dnu (-1) or dr (-2)
-        aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
+        # Get Lum (ultimate value of the vector)
+        aux = tf.cast(tf.convert_to_tensor(fields[-1:]), tf.int32)
+        lum = tf.keras.backend.flatten(tf.one_hot(depth=406, indices=aux))
+
+        # Create input vector with all features
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac, lum], axis=0), 4), axis=-1)
+        # Get Dnu as target (penultimate value of input)
+        aux = tf.cast(tf.convert_to_tensor(fields[-2:][:1]) / 0.0864, tf.int32)
         # Target to one-hot vector
         y = tf.keras.backend.flatten(tf.one_hot(depth=100, indices=aux))
+
         # If target value > 100, return False as flag, to be filtered
         return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
 
