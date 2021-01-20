@@ -27,7 +27,7 @@ class prebedding:
         """
         # Loggs and other information is load from the index.csv
         self.conf = pd.read_csv(
-            conf_file, header=None, index_col=False, names=cols, sep="\t"
+            conf_file, header=0, index_col=False, sep=","
         )
 
     def preprocess_files(
@@ -110,9 +110,10 @@ class prebedding:
             # get targets based on filename
             file_name = file.split("/")[-1:][0]
             # Info from configuration
-            dnu = self.conf[self.conf.tess == file_name.split(".")[0]]["dnu"]
+            dnu = self.conf[self.conf.star == file_name.split(".")[0]]["dnu"]
+            lum = self.conf[self.conf.star == file_name.split(".")[0]]["L"]
             # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0], dnu)).ravel()
+            line = np.hstack((dft[0], hd[0], ac[0], lum, dnu)).ravel()
             line[pd.isnull(line)] = 0  # NaN to zeros
             line = line[3:]  # drop firsts n values
 

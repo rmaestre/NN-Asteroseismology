@@ -21,7 +21,7 @@ class bedding(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1220):
+    def parse_csv_line(self, line, n_inputs=1221):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -51,9 +51,19 @@ class bedding(Data):
         ac = tf.minimum(ac, 1)
         hod = tf.minimum(hod, 1)
         dft = tf.minimum(dft, 1)
+
+        # Get luminosity
+        lum = tf.reshape(
+            tf.one_hot(
+                depth=406,
+                indices=tf.cast(tf.convert_to_tensor(fields[-2:][:1]), tf.int32),
+                axis=0,
+            ),
+            [-1],
+        )
         
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
-        # Get Dnu (-1) or dr (-2)
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac, lum], axis=0), 4), axis=-1) # Split channels
+        # Get Dnu or target
         y = tf.reshape(
             tf.one_hot(
                 depth=100,
