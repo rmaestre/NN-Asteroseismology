@@ -84,14 +84,14 @@ class starmodels(Data):
         hod = tf.minimum(hod, 1)
         dft = tf.minimum(dft, 1)
 
-        # Get Lum (ultimate value of the vector)
-        aux = tf.cast(tf.convert_to_tensor(fields[-1:]), tf.int32)
+        # Get Lum (ultipenultimatemate value of the vector)
+        aux = tf.cast(tf.convert_to_tensor(fields[-2:][:1]), tf.int32)
         lum = tf.keras.backend.flatten(tf.one_hot(depth=406, indices=aux))
 
         # Create input vector with all features
         x = tf.stack(tf.split(tf.concat([dft, hod, ac, lum], axis=0), 4), axis=-1)
-        # Get Dnu as target (penultimate value of input)
-        aux = tf.cast(tf.convert_to_tensor(fields[-2:][:1]) / 0.0864, tf.int32)
+        # Get Dnu as target (ultimate value of input)
+        aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         # Target to one-hot vector
         y = tf.keras.backend.flatten(tf.one_hot(depth=100, indices=aux))
 
