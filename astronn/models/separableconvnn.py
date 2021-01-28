@@ -24,46 +24,35 @@ class separableconvnn(Model):
         :return: [description]
         :rtype: PricingObservation
         """
+        output_bias = tf.keras.initializers.Constant(100.0)
+        initializer = tf.keras.initializers.GlorotNormal()
+        values = initializer(shape=(2, 2))
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConvolution1D(
                     kernel_size=10,
                     filters=10,
-                    depth_multiplier=10,
+                    depth_multiplier=5,
                     input_shape=(406, 3),
                     activation="relu",
-                    strides=1
+                    kernel_initializer=initializer
                 ),
-                layers.SeparableConvolution1D(
+                 layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=1,
+                    depth_multiplier=5,
                     input_shape=(406, 3),
                     activation="relu",
-                    strides=1
+                    kernel_initializer=initializer
                 ),
-                layers.MaxPool1D(2),
-                layers.SeparableConvolution1D(
-                    kernel_size=10,
-                    filters=10,
-                    depth_multiplier=10,
-                    input_shape=(406, 3),
-                    activation="relu",
-                    strides=1
-                ),
-                layers.SeparableConvolution1D(
-                    kernel_size=5,
-                    filters=10,
-                    depth_multiplier=1,
-                    input_shape=(406, 3),
-                    activation="relu",
-                    strides=1
-                ),
+
+                layers.BatchNormalization(),
                 layers.MaxPool1D(2),
                 layers.Dropout(0.2),
                 layers.Flatten(),
-                layers.Dense(256, activation="relu"),
-                layers.Dense(100, activation="softmax"),
+                #layers.Dense(450, activation="relu"),
+                layers.Dense(100, activation="softmax", 
+                kernel_initializer=initializer),
             ]
         )
         opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
