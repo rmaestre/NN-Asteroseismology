@@ -48,7 +48,7 @@ class deltascuti(Data):
         )
         ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
         # Remove firsts AC values
-        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
 
         # Normalized AC values up to 1
         ac = tf.minimum(ac, 1)

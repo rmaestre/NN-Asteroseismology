@@ -33,9 +33,10 @@ rm allevolution_tracks.out
 
 """
 
+
 def process_file(
     path,
-    output_dir="/home/roberto/Downloads/evolutionTracks_line_noisy/",
+    output_dir="/home/roberto/Downloads/evolutionTracks_line_lum/",
     MAX_FREQS_PROCESSED=30,
 ):
     """
@@ -49,8 +50,19 @@ def process_file(
         dirname_output = path.split("/")[-2]
         filename_ouput = path.split("/")[-1]
         sep = "\t"
+        # Save constants
+        Lum = np.nan
         with open(path, "r") as infile:
             for id, row in enumerate(infile):
+                # Get Luminosity information
+                if id == 9:
+                    try:
+                        chunks = " ".join(row.split()).replace(" ", ",").split(",")
+                        Lum = float(chunks[2])
+                        0/0
+                    except:
+                        print("Not LUM find %s" % path)
+                # Get frecuencies information
                 if id > 24:
                     chunks = " ".join(row.split()).replace(" ", ",").split(",")
                     if len(chunks) == 8:  # Info Star at 8 line
@@ -102,7 +114,7 @@ def process_file(
             oh = np.zeros(100)
             oh[int(np.round(dnu))] = 1
 
-            for i in range(5):
+            for i in range(1):
                 # Process signals
                 input_resolution = 0.25
                 input_bins = np.arange(-1, 101, input_resolution)
@@ -129,7 +141,7 @@ def process_file(
                 df.columns = ["vis", "n", "l", "m", "freq", "no"]
                 df_sorted = df.sort_values("vis", ascending=False).head(30)
                 # Add gaussian noise to all Ls
-                df_sorted["freq"] = np.random.normal(df_sorted['freq'], 1)
+                #df_sorted["freq"] = np.random.normal(df_sorted["freq"], 0.1)
 
                 _res = variable_stars.process(
                     frequency=df_sorted["freq"],
@@ -188,18 +200,19 @@ def process_file(
                         np.around(dft[0], 3),
                         np.around(hd[0], 3),
                         np.around(ac[0], 3),
-                        np.around(dnu, 3),
+                        np.around(Lum, 3),
+                        np.around(dnu, 3)
                     )
                 ).ravel()
                 line[pd.isnull(line)] = 0  # NaN to zeros
                 line = line[3:]  # drop firsts n values
 
-                #plt.figure()
-                #plt.plot(np.around(ac[0], 3))
-                #plt.plot(np.around(dft[0], 3))
-                #plt.plot(np.around(hd[0], 3))
-                #plt.show()
-                #plt.savefig("drop_"+str(i)+".png")
+                # plt.figure()
+                # plt.plot(np.around(ac[0], 3))
+                # plt.plot(np.around(dft[0], 3))
+                # plt.plot(np.around(hd[0], 3))
+                # plt.show()
+                # plt.savefig("drop_"+str(i)+".png")
 
                 # Save to disk
                 _df = pd.DataFrame(np.column_stack(line))
@@ -226,12 +239,11 @@ filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 
 
 # Iterative approach only for debug purpose
-for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
-    print(file)
-    process_file(file)
-    0/0
+# for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
+#     print(file)
+#     process_file(file)
 
 with Pool(8) as p:
-    p.map(
-        process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
-    )
+   p.map(
+       process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
+       )
