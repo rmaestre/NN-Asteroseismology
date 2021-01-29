@@ -23,7 +23,7 @@ class starmodels(Data):
     def is_target_in_range(self, tensor):
         return tf.cond(tensor < 100, True, False)
 
-    def parse_csv_line(self, line, n_inputs=1219):
+    def parse_csv_line(self, line, n_inputs=1626):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -46,7 +46,7 @@ class starmodels(Data):
             x_noise = tf.random.normal(
                 shape=tf.shape(x),
                 mean=x,
-                stddev=tf.random.uniform([], 0, 0.2),  # Random stddev [0,0.2]
+                stddev=tf.random.uniform([], 0, 0.0001),  # Random stddev [0,0.1]
                 dtype=tf.float32,
             )
             # Noise is valid when is >=0 and <=1.0
@@ -55,19 +55,19 @@ class starmodels(Data):
 
         if self.add_noise:
             dft = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.0,
+                tf.random.uniform([], 0, 1) > 0.7,
                 lambda: add_noise_positive(dft),
                 lambda: tf.convert_to_tensor(dft),
             )
 
             hod = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.0,
+                tf.random.uniform([], 0, 1) > 0.7,
                 lambda: add_noise_positive(hod),
                 lambda: tf.convert_to_tensor(hod),
             )
 
             ac = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.0,
+                tf.random.uniform([], 0, 1) > 0.7,
                 lambda: add_noise_positive(ac),
                 lambda: tf.convert_to_tensor(ac),
             )
@@ -75,10 +75,10 @@ class starmodels(Data):
         # Normalized HoD between 0,1
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
         # Remove firsts AC values
-        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+        # ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
         # Normalized AC values up to 1
         ac = tf.minimum(ac, 1)
         hod = tf.minimum(hod, 1)
