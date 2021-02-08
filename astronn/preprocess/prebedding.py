@@ -66,7 +66,7 @@ class prebedding:
                 frequency=df[["f"]].values,
                 amplitude=df[["a"]].values,
                 filter="uniform",
-                gRegimen=0,
+                gRegimen=58,
                 numFrequencies=num_frequencies,
                 maxDnu=1,
                 minDnu=15,
