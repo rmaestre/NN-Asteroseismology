@@ -24,36 +24,26 @@ class separableconvnn(Model):
         :return: [description]
         :rtype: PricingObservation
         """
-        output_bias = tf.keras.initializers.Constant(100.0)
         initializer = tf.keras.initializers.GlorotNormal()
         values = initializer(shape=(2, 2))
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConvolution1D(
-                    kernel_size=15,
+                    kernel_size=5,
                     filters=10,
-                    depth_multiplier=5,
+                    depth_multiplier=3,
                     input_shape=(406, 3),
                     activation="relu",
                     kernel_initializer=initializer
                 ),
                 layers.SeparableConvolution1D(
-                    kernel_size=10,
-                    filters=10,
-                    depth_multiplier=5,
-                    input_shape=(406, 3),
-                    activation="relu",
-                    kernel_initializer=initializer
-                ),
-                 layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=5,
+                    depth_multiplier=3,
                     input_shape=(406, 3),
                     activation="relu",
                     kernel_initializer=initializer
                 ),
-
                 layers.BatchNormalization(),
                 layers.MaxPool1D(2),
                 layers.Dropout(0.2),

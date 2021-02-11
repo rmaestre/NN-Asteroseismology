@@ -46,7 +46,7 @@ class starmodels(Data):
             x_noise = tf.random.normal(
                 shape=tf.shape(x),
                 mean=x,
-                stddev=tf.random.uniform([], 0, 0.0001),  # Random stddev [0,0.1]
+                stddev=tf.random.uniform([], 0, 0.001),  # Random stddev [0,0.1]
                 dtype=tf.float32,
             )
             # Noise is valid when is >=0 and <=1.0
@@ -55,34 +55,40 @@ class starmodels(Data):
 
         if self.add_noise:
             dft = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.7,
+                tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(dft),
                 lambda: tf.convert_to_tensor(dft),
             )
 
             hod = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.7,
+                tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(hod),
                 lambda: tf.convert_to_tensor(hod),
             )
 
             ac = tf.cond(
-                tf.random.uniform([], 0, 1) > 0.7,
+                tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(ac),
                 lambda: tf.convert_to_tensor(ac),
             )
 
         # Normalized HoD between 0,1
+        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(30)], np.zeros(30))
+        #dft = tf.tensor_scatter_nd_update(dft, [[i] for i in range(30)], np.zeros(30))
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
+        )
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
             tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
-        # Remove firsts AC values
-        # ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
-        # Normalized AC values up to 1
-        ac = tf.minimum(ac, 1)
-        hod = tf.minimum(hod, 1)
-        dft = tf.minimum(dft, 1)
+        #dft = tf.math.divide(
+        #    tf.subtract(dft, tf.reduce_min(dft)),
+        #    tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
+        #)
+        dft = tf.math.multiply(dft, 1.2)
+        ac = tf.math.multiply(ac, 1.3)
 
         x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)

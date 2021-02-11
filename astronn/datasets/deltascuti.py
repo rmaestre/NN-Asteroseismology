@@ -41,21 +41,20 @@ class deltascuti(Data):
         # In this case, vector stars at position 1 because in position 0 is the starID
         dft = fields[1 : 406 + 1]
         hod = fields[406 + 1 : (406 * 2) + 1]
-        # Normalize HoD
+        ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
+        # Normalized HoD between 0,1
+        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(30)], np.zeros(30))
+        #dft = tf.tensor_scatter_nd_update(dft, [[i] for i in range(30)], np.zeros(30))
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
+        )
         hod = tf.math.divide(
             tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
+            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
-        ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
-        # Remove firsts AC values
-        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
-
-        # Normalized AC values up to 1
-        ac = tf.minimum(ac, 1)
-        hod = tf.minimum(hod, 1)
-        dft = tf.minimum(dft, 1)
         
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
+        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(

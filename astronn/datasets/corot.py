@@ -54,7 +54,7 @@ class corot(Data):
         hod = tf.minimum(hod, 1)
         dft = tf.minimum(dft, 1)
 
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1) # Split channels
+        x = tf.stack(tf.split(tf.concat([ac], axis=0), 1), axis=-1) # Split channels
         # Get Logg provided in Hareter, 2013
         loggs = fields[1219]
         # Get Luminosity provided in Paparo, 2016
