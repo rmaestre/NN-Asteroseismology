@@ -34,26 +34,27 @@ class separableconvnn(Model):
                     depth_multiplier=3,
                     input_shape=(406, 3),
                     activation="relu",
-                    kernel_initializer=initializer
                 ),
                 layers.SeparableConvolution1D(
-                    kernel_size=5,
+                    kernel_size=2,
                     filters=10,
                     depth_multiplier=3,
-                    input_shape=(406, 3),
+                    input_shape=(406, 2),
                     activation="relu",
-                    kernel_initializer=initializer
                 ),
-                layers.BatchNormalization(),
                 layers.MaxPool1D(2),
-                layers.Dropout(0.2),
+                layers.BatchNormalization(),
                 layers.Flatten(),
-                #layers.Dense(450, activation="relu"),
-                layers.Dense(100, activation="softmax", 
-                kernel_initializer=initializer),
+                # layers.Dense(250, activation="relu"),
+                layers.Dropout(0.2),
+                layers.Dense(100, activation="softmax"),
             ]
         )
-        opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=learning_rate, decay_steps=400, decay_rate=0.9
+        )
+
+        opt = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
         self.model.compile(
             loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"]
