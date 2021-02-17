@@ -51,7 +51,7 @@ class bedding(Data):
             tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
         
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
+        x = tf.stack(tf.split(tf.concat([dft, ac], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(

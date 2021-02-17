@@ -21,15 +21,17 @@ batch of them, in order to be processed by tf.Datasets
 
 # all files to one file 
 find . -name "*.log" -exec cat '{}' ';' > allevolution_tracks.out
+shuf allevolution_tracks.out > allevolution_tracks_shuf.out
+rm allevolution_tracks.out
 
 # Create dir and split big file
 mkdir parts
-mv allevolution_tracks.out parts
+mv allevolution_tracks_shuf.out parts
 cd parts
 
 # split big file into multiple ones, using 1000 lines per file
-split -l 1000 allevolution_tracks.out
-rm allevolution_tracks.out
+split -l 1000 allevolution_tracks_shuf.out
+rm allevolution_tracks_shuf.out
 
 """
 

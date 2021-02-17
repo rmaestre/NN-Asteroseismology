@@ -87,10 +87,10 @@ class starmodels(Data):
         #    tf.subtract(dft, tf.reduce_min(dft)),
         #    tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         #)
-        dft = tf.math.multiply(dft, 1.2)
-        ac = tf.math.multiply(ac, 1.3)
+        dft = tf.math.multiply(dft, 1.0)
+        ac = tf.math.multiply(ac, 1.4)
 
-        x = tf.stack(tf.split(tf.concat([dft, hod, ac], axis=0), 3), axis=-1)
+        x = tf.stack(tf.split(tf.concat([dft, ac], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         # Target to one-hot vector
