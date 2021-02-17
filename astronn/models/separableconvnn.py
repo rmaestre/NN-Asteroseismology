@@ -24,34 +24,32 @@ class separableconvnn(Model):
         :return: [description]
         :rtype: PricingObservation
         """
-        initializer = tf.keras.initializers.GlorotNormal()
-        values = initializer(shape=(2, 2))
+
         self.model = tf.keras.Sequential(
             [
                 layers.SeparableConvolution1D(
                     kernel_size=5,
                     filters=10,
-                    depth_multiplier=3,
-                    input_shape=(406, 3),
-                    activation="relu",
+                    depth_multiplier=2,
+                    input_shape=(406, 2),
+                    activation="relu"
                 ),
                 layers.SeparableConvolution1D(
-                    kernel_size=2,
+                    kernel_size=5,
                     filters=10,
-                    depth_multiplier=3,
+                    depth_multiplier=2,
                     input_shape=(406, 2),
-                    activation="relu",
+                    activation="relu"
                 ),
-                layers.MaxPool1D(2),
+                layers.AveragePooling1D(2),
                 layers.BatchNormalization(),
-                layers.Flatten(),
-                # layers.Dense(250, activation="relu"),
                 layers.Dropout(0.2),
+                layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
         )
         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=learning_rate, decay_steps=400, decay_rate=0.9
+            initial_learning_rate=learning_rate, decay_steps=150, decay_rate=0.9
         )
 
         opt = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
