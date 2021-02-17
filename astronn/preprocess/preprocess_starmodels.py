@@ -22,16 +22,26 @@ batch of them, in order to be processed by tf.Datasets
 # all files to one file 
 find . -name "*.log" -exec cat '{}' ';' > allevolution_tracks.out
 shuf allevolution_tracks.out > allevolution_tracks_shuf.out
+# Split into train and validation
 rm allevolution_tracks.out
+head -912281  allevolution_tracks_shuf.out > allevolution_tracks_shuf_train.out
+tail -101364  allevolution_tracks_shuf.out > allevolution_tracks_shuf_validation.out
+rm allevolution_tracks_shuf.out
 
 # Create dir and split big file
-mkdir parts
-mv allevolution_tracks_shuf.out parts
-cd parts
+mkdir parts_train
+mkdir parts_validation
+mv allevolution_tracks_shuf_train.out parts_train
+mv allevolution_tracks_shuf_validation.out parts_validation
 
 # split big file into multiple ones, using 1000 lines per file
-split -l 1000 allevolution_tracks_shuf.out
-rm allevolution_tracks_shuf.out
+cd parts_train
+split -l 1000 allevolution_tracks_shuf_train.out
+rm allevolution_tracks_shuf_train.out
+cd ..
+cd parts_validation
+split -l 1000 allevolution_tracks_shuf_validation.out
+rm allevolution_tracks_shuf_validation.out
 
 """
 
