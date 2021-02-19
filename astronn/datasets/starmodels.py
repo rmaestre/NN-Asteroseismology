@@ -87,7 +87,7 @@ class starmodels(Data):
         #    tf.subtract(dft, tf.reduce_min(dft)),
         #    tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         #)
-        dft = tf.math.multiply(dft, 1.0)
+        dft = tf.math.multiply(dft, 1.1)
         ac = tf.math.multiply(ac, 1.4)
 
         x = tf.stack(tf.split(tf.concat([dft, ac], axis=0), 2), axis=-1)
