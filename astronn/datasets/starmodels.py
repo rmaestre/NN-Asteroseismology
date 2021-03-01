@@ -23,18 +23,22 @@ class starmodels(Data):
     def is_target_in_range(self, tensor):
         return tf.cond(tensor < 100, True, False)
 
-    def parse_csv_line(self, line, n_inputs=1626):
+    def parse_csv_line(self, line, n_inputs=1202):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
         convert last value of raw data into the expected target
         """
-        defs = [tf.constant(np.nan)] * n_inputs
+        # (n_inputs - 1) as float
+        defs = [tf.constant(np.nan)] * (n_inputs - 1)
+        # First field is a string
+        defs.insert(0, tf.constant("", dtype=tf.string))
+        # Read fields
         fields = tf.io.decode_csv(line, record_defaults=defs)
-        # Get DFT, HD and AC
-        dft = fields[0:406]
-        hod = fields[406 : 406 * 2]
-        ac = fields[406 * 2 : 406 * 3]
+        # Get info channels
+        dft = fields[1 : 400 + 1]
+        hod = fields[400 + 1 : (400 * 2) + 1]
+        ac = fields[(400 * 2) + 1 : (400 * 3) + 1]
 
         # Random noise on random channels [test on training]
         def add_noise_positive(x):
@@ -85,12 +89,12 @@ class starmodels(Data):
         )
         #dft = tf.math.divide(
         #    tf.subtract(dft, tf.reduce_min(dft)),
-        #    tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
+        #    tf.subtract(tf.reduce_max(dft),utf.reduce_min(dft)),
         #)
-        dft = tf.math.multiply(dft, 1.1)
-        ac = tf.math.multiply(ac, 1.4)
+        dft = tf.math.multiply(dft, 1.0)
+        ac = tf.math.multiply(ac, 1.2)
 
-        x = tf.stack(tf.split(tf.concat([dft, ac], axis=0), 2), axis=-1)
+        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
         # Target to one-hot vector

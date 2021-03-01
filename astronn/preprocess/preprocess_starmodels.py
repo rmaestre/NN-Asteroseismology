@@ -24,8 +24,8 @@ find . -name "*.log" -exec cat '{}' ';' > allevolution_tracks.out
 shuf allevolution_tracks.out > allevolution_tracks_shuf.out
 # Split into train and validation
 rm allevolution_tracks.out
-head -912281  allevolution_tracks_shuf.out > allevolution_tracks_shuf_train.out
-tail -101364  allevolution_tracks_shuf.out > allevolution_tracks_shuf_validation.out
+head -500000  allevolution_tracks_shuf.out > allevolution_tracks_shuf_train.out
+tail -6624  allevolution_tracks_shuf.out > allevolution_tracks_shuf_validation.out
 rm allevolution_tracks_shuf.out
 
 # Create dir and split big file
@@ -48,7 +48,7 @@ rm allevolution_tracks_shuf_validation.out
 
 def process_file(
     path,
-    output_dir="/home/roberto/Downloads/evolutionTracks_line_lum/",
+    output_dir="/home/roberto/Downloads/evolutionTracks_line/",
     MAX_FREQS_PROCESSED=30,
 ):
     """
@@ -71,7 +71,7 @@ def process_file(
                     try:
                         chunks = " ".join(row.split()).replace(" ", ",").split(",")
                         Lum = float(chunks[2])
-                        0/0
+                        0 / 0
                     except:
                         print("Not LUM find %s" % path)
                 # Get frecuencies information
@@ -129,7 +129,7 @@ def process_file(
             for i in range(1):
                 # Process signals
                 input_resolution = 0.25
-                input_bins = np.arange(-1, 101, input_resolution)
+                input_bins = np.arange(0, 100.1, 0.25)
 
                 variable_stars = importr("variableStars")
                 pandas2ri.activate()
@@ -153,13 +153,13 @@ def process_file(
                 df.columns = ["vis", "n", "l", "m", "freq", "no"]
                 df_sorted = df.sort_values("vis", ascending=False).head(30)
                 # Add gaussian noise to all Ls
-                #df_sorted["freq"] = np.random.normal(df_sorted["freq"], 0.1)
+                # df_sorted["freq"] = np.random.normal(df_sorted["freq"], 0.1)
 
                 _res = variable_stars.process(
                     frequency=df_sorted["freq"],
                     amplitude=df_sorted["vis"],
                     filter="uniform",
-                    gRegimen=0,
+                    gRegimen=58,
                     numFrequencies=30,
                     maxDnu=1,
                     minDnu=15,
@@ -204,20 +204,19 @@ def process_file(
                     bins=input_bins,
                 )
 
+                # Get filename
                 file_name = path.split("/")[-1:][0]
                 # Info from configuration
                 # Stak all channels
                 line = np.hstack(
                     (
-                        np.around(dft[0], 3),
-                        np.around(hd[0], 3),
-                        np.around(ac[0], 3),
-                        np.around(Lum, 3),
-                        np.around(dnu, 3)
+                        dirname_output + "-" + filename_ouput,
+                        np.nan_to_num(np.around(dft[0], 3)),
+                        np.nan_to_num(np.around(hd[0], 3)),
+                        np.nan_to_num(np.around(ac[0], 3)),
+                        np.around(dnu, 3),
                     )
                 ).ravel()
-                line[pd.isnull(line)] = 0  # NaN to zeros
-                line = line[3:]  # drop firsts n values
 
                 # plt.figure()
                 # plt.plot(np.around(ac[0], 3))
@@ -227,6 +226,7 @@ def process_file(
                 # plt.savefig("drop_"+str(i)+".png")
 
                 # Save to disk
+
                 _df = pd.DataFrame(np.column_stack(line))
                 # _df.insert(0, "star", file_name.split(".")[0])
                 # Save data to file
@@ -249,13 +249,28 @@ filou_folder = "/home/roberto/Downloads/evolutionTracks/FILOU/*"
 #    "/home/roberto/Downloads/evolutionTracks/FILOU/VO-m220fe-4a164o0rotjpzt5p7-ad/00489-m220fe-4a164o0rotjpzt5p7-ad.frq"
 # )
 
-
 # Iterative approach only for debug purpose
 # for file in glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq"):
 #     print(file)
 #     process_file(file)
 
+
+# Selected models
+files_to_be_processed = []
+parent_path = "/home/roberto/Downloads/evolutionTracks/FILOU/"
+with open(
+    "/home/roberto/Projects/asteroseismologyNN/selected_models.csv", "r"
+) as infile:
+    for id, row in enumerate(infile):
+        if id > 0:  # skip header
+            file = row.split(",")[-1].replace('"', "").replace("\n", "")
+            files_to_be_processed.append(parent_path + file)
+            
+# Launch threads
 with Pool(8) as p:
-   p.map(
-       process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
-       )
+    p.map(
+        # process_file, glob.glob("/home/roberto/Downloads/evolutionTracks/FILOU/*/*.frq")
+        process_file,
+        files_to_be_processed,
+    )
+

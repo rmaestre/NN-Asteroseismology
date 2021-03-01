@@ -21,7 +21,7 @@ class bedding(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1220):
+    def parse_csv_line(self, line, n_inputs=1202):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -36,12 +36,12 @@ class bedding(Data):
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
         # In this case, vector stars at position 1 because in position 0 is the starID
-        dft = fields[1 : 406 + 1]
-        hod = fields[406 + 1 : (406 * 2) + 1]
-        ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
+        dft = fields[1 : 400 + 1]
+        hod = fields[400 + 1 : (400 * 2) + 1]
+        ac = fields[(400 * 2) + 1 : (400 * 3) + 1]
+
         # Normalized HoD between 0,1
         #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(30)], np.zeros(30))
-        #dft = tf.tensor_scatter_nd_update(dft, [[i] for i in range(30)], np.zeros(30))
         ac = tf.math.divide(
             tf.subtract(ac, tf.reduce_min(ac)),
             tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
@@ -51,7 +51,7 @@ class bedding(Data):
             tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
         )
         
-        x = tf.stack(tf.split(tf.concat([dft, ac], axis=0), 2), axis=-1)
+        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(
@@ -62,7 +62,7 @@ class bedding(Data):
             (1, 100),
         )
         # get DNU from bedding's paper 2020
-        dnu = fields[1219]
+        dnu = fields[1201]
         # return values
         return fields[0], x, y, dnu
 

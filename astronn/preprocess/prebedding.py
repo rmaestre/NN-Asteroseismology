@@ -41,7 +41,8 @@ class prebedding:
         """
         """
         input_resolution = 0.25
-        input_bins = np.arange(-1, 101, input_resolution)
+        input_bins = np.arange(0, 100.1, 0.25)
+
         files = glob.glob(input_folder)
         if len(files) == 0:
             log.warning("Input folder %s is empty!" % input_folder)
@@ -112,9 +113,15 @@ class prebedding:
             # Info from configuration
             dnu = self.conf[self.conf.tess == file_name.split(".")[0]]["dnu"]
             # Stak all channels
-            line = np.hstack((dft[0], hd[0], ac[0], dnu)).ravel()
+            line = np.hstack(
+                    (
+                        np.nan_to_num(np.around(dft[0], 3)),
+                        np.nan_to_num(np.around(hd[0], 3)),
+                        np.nan_to_num(np.around(ac[0], 3)),
+                        np.around(dnu, 3)
+                    )
+                ).ravel()
             line[pd.isnull(line)] = 0  # NaN to zeros
-            line = line[3:]  # drop firsts n values
 
             # Save to disk
             _df = pd.DataFrame(np.column_stack(line))
