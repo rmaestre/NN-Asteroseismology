@@ -92,7 +92,7 @@ class starmodels(Data):
         #    tf.subtract(tf.reduce_max(dft),utf.reduce_min(dft)),
         #)
         dft = tf.math.multiply(dft, 1.0)
-        ac = tf.math.multiply(ac, 1.2)
+        ac = tf.math.multiply(ac, 1.35)
 
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)
