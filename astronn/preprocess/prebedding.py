@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 import tensorflow as tf
-
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +56,19 @@ class prebedding:
                 index_col=False,
                 names=["f", "signif", "a", "V4", "V5", "V6", "V7"],
             )
+
+            """
+            file_name = file.split("/")[-1:][0]
+            _df = pd.DataFrame(df.sort_values(by='a', ascending=False).head(1)[["f","a"]])
+            _df.insert(0, "tess", file_name.split(".")[0])
+            _df.insert(0, "tic", file.split("/")[-1:][0].split(".")[0].split("-")[2])
+            _df.to_csv(
+                "/tmp/bedding/" + file.split("/")[-1:][0].split(".")[0].split("-")[2] +".log",
+                index=False,
+                header=False,
+            )
+            """
+
             # Check for NaN values
             if df.isnull().values.any():
                 log.error("Some malformated value in file %s" % file)
@@ -111,7 +124,7 @@ class prebedding:
             # get targets based on filename
             file_name = file.split("/")[-1:][0]
             # Info from configuration
-            dnu = self.conf[self.conf.tess == file_name.split(".")[0]]["dnu"]
+            dnu = self.conf[self.conf.tess == file_name.split(".")[0]]["dnu"] / 0.0864
             # Stak all channels
             line = np.hstack(
                     (

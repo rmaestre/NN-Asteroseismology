@@ -45,16 +45,29 @@ class deltascuti(Data):
         ac = fields[(400 * 2) + 1 : (400 * 3) + 1]
 
         # Normalized HoD between 0,1
-        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(30)], np.zeros(30))
-        #dft = tf.tensor_scatter_nd_update(dft, [[i] for i in range(30)], np.zeros(30))
+        """
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(tf.gather(ac, [i for i in range(20, 400)])), tf.reduce_min(ac)),
+        )
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(tf.gather(dft, [i for i in range(0, 400)])), tf.reduce_min(dft)),
+        )
+        """
         ac = tf.math.divide(
             tf.subtract(ac, tf.reduce_min(ac)),
             tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
         )
-        hod = tf.math.divide(
-            tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         )
+        
+        ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
+        #dft = tf.where(tf.greater(dft, 4.0), 4.0, dft)
+        #ac = tf.math.multiply(ac, 1.6)
+        
         
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
         # Get Dnu (-1) or dr (-2)

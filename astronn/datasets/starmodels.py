@@ -50,7 +50,7 @@ class starmodels(Data):
             x_noise = tf.random.normal(
                 shape=tf.shape(x),
                 mean=x,
-                stddev=tf.random.uniform([], 0, 0.001),  # Random stddev [0,0.1]
+                stddev=tf.random.uniform([], 0, 0.01),  # Random stddev [0,0.1]
                 dtype=tf.float32,
             )
             # Noise is valid when is >=0 and <=1.0
@@ -58,49 +58,87 @@ class starmodels(Data):
             return x + (x_noise * mask)  # Apply mask
 
         if self.add_noise:
+            """
             dft = tf.cond(
                 tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(dft),
                 lambda: tf.convert_to_tensor(dft),
             )
-
             hod = tf.cond(
                 tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(hod),
                 lambda: tf.convert_to_tensor(hod),
             )
-
+            """
+            
             ac = tf.cond(
                 tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(ac),
                 lambda: tf.convert_to_tensor(ac),
             )
+            
 
         # Normalized HoD between 0,1
-        #ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(30)], np.zeros(30))
-        #dft = tf.tensor_scatter_nd_update(dft, [[i] for i in range(30)], np.zeros(30))
+        # Normalized HoD between 0,1
+        """
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(tf.gather(ac, [i for i in range(20, 400)])), tf.reduce_min(ac)),
+        )
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(tf.gather(dft, [i for i in range(10, 400)])), tf.reduce_min(dft)),
+        )
+        """
         ac = tf.math.divide(
             tf.subtract(ac, tf.reduce_min(ac)),
             tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
         )
-        hod = tf.math.divide(
-            tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod), tf.reduce_min(hod)),
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         )
-        #dft = tf.math.divide(
-        #    tf.subtract(dft, tf.reduce_min(dft)),
-        #    tf.subtract(tf.reduce_max(dft),utf.reduce_min(dft)),
-        #)
-        dft = tf.math.multiply(dft, 1.0)
-        ac = tf.math.multiply(ac, 1.35)
+        
+        dft = tf.where(tf.greater(dft, 1.0), 1.0, dft)
+        ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
+        #ac = tf.math.multiply(ac, 1.2)
+        
 
-        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
+        
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
+        aux = tf.cond(aux>100,lambda:100,lambda:aux)
+
         # Target to one-hot vector
         y = tf.keras.backend.flatten(tf.one_hot(depth=100, indices=aux))
+        
+        # Remove GAP on real values
+        
+        #ind_max = tf.math.reduce_min([tf.squeeze(aux * 4) + 1, 400])
+        #ind_min = tf.math.reduce_max([tf.squeeze(aux * 4) - 1, 0])
+        
+        ind_max = tf.cond((aux * 4)+30 > 400, lambda: 400, lambda: (aux*4) + 20)
+        ind_min = tf.cond((aux * 4)-30 < 0, lambda: 0, lambda: (aux*4) - 20)
+        
+        #tf.print(aux, ind_min, ind_max)
+        
+        indices = tf.range(ind_min, 
+                           ind_max, 
+                           1, 
+                           name="rangebug")
+
+        updates = tf.random.uniform([tf.size(indices)], 0.01, 0.15)
+        ac = tf.tensor_scatter_nd_update(ac, 
+                                         tf.reshape(indices, (tf.size(indices), 1)), 
+                                         updates)
+        
+        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
+        
         # If target value > 100, return False as flag, to be filtered
         return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
+    
+        
+
 
     def csv_reader_dataset(
         self,
