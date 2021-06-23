@@ -30,7 +30,7 @@ class inferences:
 
         for star in df_stars.take(take_number):  # take the take_number first stars
             target = np.where(star[2].numpy().flat == 1)[0].flat[0]
-            print(target)
+
             # Save results
             if star[0].numpy()[0].decode("utf-8") not in results:
                 results[star[0].numpy()[0].decode("utf-8")] = {
@@ -195,7 +195,7 @@ class inferences:
             fmt="x",
             markersize=10,
             capsize=2,
-            label="Target",
+            label="Dnu",
         )
 
         plt.errorbar(
@@ -203,7 +203,7 @@ class inferences:
             df["top1"],
             df["e-top1"],
             elinewidth=0.5,
-            markersize=4,
+            markersize=6,
             capsize=2,
             fmt="o",
             color="red",
@@ -268,4 +268,53 @@ class inferences:
         plt.ylabel("$\langle\Delta\\nu\\rangle / \Delta\\nu_\odot$")
         plt.title(plot_title)
         # plt.ylim(0, 1.0)
+        plt.show()
+
+    def plot_relation_rodriguez(df, labels=True, relation_line_range=(3.2, 9)):
+        """
+        """
+        plt.subplots(1, figsize=(7, 4), dpi=120)
+
+        select_closest_top = np.argmin(
+            (
+                np.power(np.asarray(df["dnu-target"]) - np.asarray(df["top1"]), 2,),
+                np.power(np.asarray(df["dnu-target"]) - np.asarray(df["top2"]), 2,),
+            ),
+            axis=0,
+        )
+
+        tops = np.where(select_closest_top == 0, df["top1"], df["top2"],).astype(float)
+
+        if labels:
+            for i, row in df.iterrows():
+                plt.annotate(
+                    row["id"],
+                    (
+                        np.log10(tops[i] / dnu_sun),
+                        np.log10(
+                            get_rho(np.asarray(row["dnu-target"]) / dnu_sun) / rho_sun
+                        ),
+                    ),
+                    size=9,
+                )
+
+        plt.scatter(
+            np.log10(tops / dnu_sun),
+            np.log10(
+                get_rho(np.asarray(df["dnu-target"].values.astype(float)) / dnu_sun)
+                / rho_sun
+            ),
+        )
+
+        # Plot relation
+        xs = np.arange(relation_line_range[0], relation_line_range[1])
+        rs = get_rho(xs)
+        plt.plot(
+            np.log10(rs / dnu_sun),
+            np.log10(get_rho(np.asarray(rs) / dnu_sun) / rho_sun),
+            label="Relation (M)",
+        )
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
+        plt.title("Closest NN tops and Rodriguez-Martin et.al. 2020")
+
         plt.show()
