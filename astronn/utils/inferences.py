@@ -270,7 +270,7 @@ class inferences:
         # plt.ylim(0, 1.0)
         plt.show()
 
-        def plot_relation_rodriguez(df, labels=True, relation_line_range=(3.2, 9)):
+    def plot_relation_rodriguez(df, labels=True, relation_line_range=(3.2, 9)):
         """
         """
         plt.subplots(1, figsize=(7, 4), dpi=120)
@@ -318,5 +318,5 @@ class inferences:
         plt.title("Closest NN top on the Rodriguez-Martin et.al. 2020 relation")
         plt.ylabel("$\log(\\rho/\\rho_\odot)$")
         plt.xlabel("$\log(\Delta\\nu/\Delta\\nu_\odot)$")
-        
+
         plt.show()
