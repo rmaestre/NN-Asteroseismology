@@ -1,19 +1,8 @@
 import glob
 import os
-from re import M
-import shutil
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-
 from multiprocessing import Pool
-from itertools import product
-
-from scipy.stats import binned_statistic
-
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-from rpy2.robjects import R, pandas2ri, numpy2ri
 
 
 """
@@ -200,6 +189,7 @@ def process_file(
             # shutil.rmtree(output_dir + dirname_output)
             os.makedirs(output_dir + dirname_output)
 
+        dnu = np.nan
         if len(line_out) / 4 < MAX_FREQS_PROCESSED:
             print(
                 "Not enough frequencies (%d) for star %s"
@@ -228,26 +218,27 @@ def process_file(
             # calculate dnu
             dnu = np.mean(medians)
 
-        rho_roche = calculate_rho_roche(1, nu_rots, R, M, roche_file)
-        # _df.insert(0, "star", file_name.split(".")[0])
-        _df = pd.DataFrame(
-            {"Teff": [Teff], "Dnu": [dnu], "rho_roche": [rho_roche]},
-            columns=["Teff", "Dnu", "rho_roche"],
-        )
+        if not np.isnan(dnu):
+            rho_roche = calculate_rho_roche(1, nu_rots, R, M, roche_file)
+            # _df.insert(0, "star", file_name.split(".")[0])
+            _df = pd.DataFrame(
+                {"Teff": [Teff], "Dnu": [dnu], "rho_roche": [rho_roche]},
+                columns=["Teff", "Dnu", "rho_roche"],
+            )
 
-        # Get filename
-        file_name = path.split("/")[-1:][0]
-        # Save data to file
-        _df.to_csv(
-            output_dir
-            + dirname_output
-            + "/"
-            + file_name.split(".")[0]
-            + ".log",
-            index=False,
-            header=False,
-            mode="a",
-        )
+            # Get filename
+            file_name = path.split("/")[-1:][0]
+            # Save data to file
+            _df.to_csv(
+                output_dir
+                + dirname_output
+                + "/"
+                + file_name.split(".")[0]
+                + ".log",
+                index=False,
+                header=False,
+                mode="a",
+            )
 
 
 # Output dir to save all models
