@@ -1,4 +1,5 @@
 import logging
+from re import M
 
 from astronn.utils.metrics import *
 
@@ -270,53 +271,41 @@ class inferences:
         # plt.ylim(0, 1.0)
         plt.show()
 
-    def plot_relation_rodriguez(df, labels=True, relation_line_range=(3.2, 9)):
+    def plot_relation_rodriguez(
+        dnus=None,
+        rhos=None,
+        points_ids=True,
+        relation_line_range=(3.2, 9),
+        plot_title=None,
+        points_label="",
+    ):
         """
         """
         plt.subplots(1, figsize=(7, 4), dpi=120)
 
-        select_closest_top = np.argmin(
-            (
-                np.power(np.asarray(df["dnu-target"]) - np.asarray(df["top1"]), 2,),
-                np.power(np.asarray(df["dnu-target"]) - np.asarray(df["top2"]), 2,),
-            ),
-            axis=0,
+        plt.scatter(
+            np.log10(dnus / dnu_sun), np.log10(rhos / rho_sun), label=points_label
         )
 
-        tops = np.where(select_closest_top == 0, df["top1"], df["top2"],).astype(float)
-
-        if labels:
-            for i, row in df.iterrows():
+        if points_ids is not None:
+            for i, row in points_ids.iteritems():
                 plt.annotate(
-                    row["id"],
-                    (
-                        np.log10(tops[i] / dnu_sun),
-                        np.log10(
-                            get_rho(np.asarray(row["dnu-target"]) / dnu_sun) / rho_sun
-                        ),
-                    ),
+                    row,
+                    (np.log10(dnus[i] / dnu_sun), np.log10(rhos[i] / rho_sun),),
                     size=9,
                 )
-
-        plt.scatter(
-            np.log10(tops / dnu_sun),
-            np.log10(
-                get_rho(np.asarray(df["dnu-target"].values.astype(float)) / dnu_sun)
-                / rho_sun
-            ),
-        )
-
         # Plot relation
         xs = np.arange(relation_line_range[0], relation_line_range[1])
         rs = get_rho(xs)
         plt.plot(
             np.log10(rs / dnu_sun),
             np.log10(get_rho(np.asarray(rs) / dnu_sun) / rho_sun),
-            label="Relation (M)",
+            label="Relation (RM-2020)",
         )
         plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
-        plt.title("Closest NN top on the Rodriguez-Martin et.al. 2020 relation")
+
+        if plot_title is not None:
+            plt.title(plot_title)
         plt.ylabel("$\log(\\rho/\\rho_\odot)$")
         plt.xlabel("$\log(\Delta\\nu/\Delta\\nu_\odot)$")
-
         plt.show()

@@ -222,8 +222,8 @@ def process_file(
             rho_roche = calculate_rho_roche(1, nu_rots, R, M, roche_file)
             # _df.insert(0, "star", file_name.split(".")[0])
             _df = pd.DataFrame(
-                {"Teff": [Teff], "Dnu": [dnu], "rho_roche": [rho_roche]},
-                columns=["Teff", "Dnu", "rho_roche"],
+                {"Teff": [Teff], "Dnu": [dnu], "L": [Lum], "rho_roche": [rho_roche]},
+                columns=["Teff", "Dnu", "L", "rho_roche"],
             )
 
             # Get filename
