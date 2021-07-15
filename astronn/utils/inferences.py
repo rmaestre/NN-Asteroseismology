@@ -284,7 +284,7 @@ class inferences:
         plt.subplots(1, figsize=(7, 4), dpi=120)
 
         plt.scatter(
-            np.log10(dnus / dnu_sun), np.log10(rhos / rho_sun), label=points_label
+            np.log10(dnus / dnu_sun), np.log10(rhos / rho_sun), label=points_label, alpha=0.5
         )
 
         if points_ids is not None:
