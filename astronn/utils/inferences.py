@@ -274,34 +274,52 @@ class inferences:
     def plot_relation_rodriguez(
         dnus=None,
         rhos=None,
+        ednus=None,
         points_ids=True,
-        relation_line_range=(3.2, 9),
+        relation_line_range=(0.1, 2),
         plot_title=None,
         points_label="",
     ):
         """
         """
-        plt.subplots(1, figsize=(7, 4), dpi=120)
+        fig, ax = plt.subplots(1, figsize=(7, 4), dpi=120)
+        # Set scales
+        ax.set_xscale("log", basex=10)
+        ax.set_yscale("log", basey=10)
 
         plt.scatter(
-            np.log10(dnus / dnu_sun), np.log10(rhos / rho_sun), label=points_label, alpha=0.5
+            dnus / dnu_sun, rhos / rho_sun, label=points_label, alpha=0.5,
         )
+
+        if ednus is not None:
+            ax.errorbar(
+                dnus / dnu_sun, rhos / rho_sun, xerr=ednus / dnu_sun, fmt="o", capsize=2
+            )
 
         if points_ids is not None:
             for i, row in points_ids.iteritems():
                 plt.annotate(
-                    row,
-                    (np.log10(dnus[i] / dnu_sun), np.log10(rhos[i] / rho_sun),),
-                    size=9,
+                    row, (dnus[i] / dnu_sun, rhos[i] / rho_sun,), size=9,
                 )
         # Plot relation
-        xs = np.arange(relation_line_range[0], relation_line_range[1])
-        rs = get_rho(xs)
+        dnus_line = np.arange(relation_line_range[0], relation_line_range[1])
+        # Get rho from RM and its error
+        rs = get_rho(dnus_line)
+        rs_upper = get_rho_upper_bound(dnus_line)
+        rs_lower = get_rho_lower_bound(dnus_line)
+        # Plot Rho
         plt.plot(
-            np.log10(rs / dnu_sun),
-            np.log10(get_rho(np.asarray(rs) / dnu_sun) / rho_sun),
-            label="Relation (RM-2020)",
+            dnus_line, rs / rho_sun, label="Relation (RM-2020)",
         )
+        # Plot lower and upper bounds error
+        ax.fill_between(
+            dnus_line,
+            rs_lower / rho_sun,
+            rs_upper / rho_sun,
+            alpha=0.2,
+            color="lightblue",
+        )
+
         plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 
         if plot_title is not None:
