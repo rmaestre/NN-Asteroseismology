@@ -287,29 +287,41 @@ class inferences:
         ax.set_xscale("log", basex=10)
         ax.set_yscale("log", basey=10)
 
-        plt.scatter(
-            dnus / dnu_sun, rhos / rho_sun, label=points_label, alpha=0.5,
-        )
-
+        # Plot scatter with errorbars or without errorbars
         if ednus is not None:
             ax.errorbar(
-                dnus / dnu_sun, rhos / rho_sun, xerr=ednus / dnu_sun, fmt="o", capsize=2
+                dnus / dnu_sun,
+                rhos / rho_sun,
+                xerr=ednus / dnu_sun,
+                fmt="o",
+                capsize=2,
+                label=points_label,
+                alpha=0.5,
+                color="mediumblue"
+            )
+        else:
+            plt.scatter(
+                dnus / dnu_sun, rhos / rho_sun, label=points_label, alpha=0.5, color="mediumblue"
             )
 
+        # Add id labels on points if ara available
         if points_ids is not None:
             for i, row in points_ids.iteritems():
                 plt.annotate(
                     row, (dnus[i] / dnu_sun, rhos[i] / rho_sun,), size=9,
                 )
+
         # Plot relation
         dnus_line = np.arange(relation_line_range[0], relation_line_range[1])
+
         # Get rho from RM and its error
         rs = get_rho(dnus_line)
         rs_upper = get_rho_upper_bound(dnus_line)
         rs_lower = get_rho_lower_bound(dnus_line)
+
         # Plot Rho
         plt.plot(
-            dnus_line, rs / rho_sun, label="Relation (RM-2020)",
+            dnus_line, rs / rho_sun, label="Relation (RM-2020)", color="lightblue"
         )
         # Plot lower and upper bounds error
         ax.fill_between(
