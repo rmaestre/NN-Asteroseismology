@@ -48,6 +48,19 @@ def get_rho(delta_nu):
     """
     return 1.6 * np.power(delta_nu, 2.02)
 
+def get_rho_upper_bound(delta_nu, e_A=0.5, e_B=0.1):
+    """
+    Relation Rodriguez-Martin et.al. 2020
+    """
+    return (1.6 + e_A) * np.power(delta_nu, (2.02 + e_B))
+
+
+def get_rho_lower_bound(delta_nu, e_A=0.5, e_B=0.1):
+    """
+    Relation Rodriguez-Martin et.al. 2020
+    """
+    return (1.6 - (e_A - 0.1)) * np.power(delta_nu, (2.02 - e_B))
+
 
 def rho_error(delta_nu, A=1.6, e_A=0.5, B=2.02, e_B=0.1):
     """
