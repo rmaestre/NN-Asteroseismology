@@ -75,7 +75,7 @@ def rho_error(delta_nu, A=1.6, e_A=0.5, B=2.02, e_B=0.1):
 def get_dnu_from_rho(rho):
     """
     """
-    return math.pow(rho / 1.6, math.pow(2.02, -1))
+    return np.power(rho / 1.6, np.power(2.02, -1))
 
 
 def dnu_error(rho, A=1.6, e_A=0.0, B=2.02, e_B=0.1):
