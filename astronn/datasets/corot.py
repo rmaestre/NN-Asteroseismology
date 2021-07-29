@@ -23,7 +23,7 @@ class corot(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1202):
+    def parse_csv_line(self, line, n_inputs=1201):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -37,30 +37,43 @@ class corot(Data):
         # Read fields
         fields = tf.io.decode_csv(line, record_defaults=defs)
         # Get DFT, HD and AC
-        # In this case, signal starts at position 1 because in position 0 is the starID
-        dft = fields[1 : 406 + 1]
-        hod = fields[406 + 1 : (406 * 2) + 1]
-        # Normalize HoD
-        hod = tf.math.divide(
-            tf.subtract(hod, tf.reduce_min(hod)),
-            tf.subtract(tf.reduce_max(hod) * 2, tf.reduce_min(hod)),
+        # In this case, vector stars at position 1 because in position 0 is the starID
+        dft = fields[1 : 400 + 1]
+        hod = fields[400 + 1 : (400 * 2) + 1]
+        ac = fields[(400 * 2) + 1 : (400 * 3) + 1]
+
+        # Normalized HoD between 0,1
+        """
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(tf.gather(ac, [i for i in range(20, 400)])), tf.reduce_min(ac)),
         )
-        ac = fields[(406 * 2) + 1 : (406 * 3) + 1]
-        # Remove firsts AC values
-        ac = tf.tensor_scatter_nd_update(ac, [[i] for i in range(10)], np.zeros(10))
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(tf.gather(dft, [i for i in range(0, 400)])), tf.reduce_min(dft)),
+        )
+        """
+        ac = tf.math.divide(
+            tf.subtract(ac, tf.reduce_min(ac)),
+            tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
+        )
+        dft = tf.math.divide(
+            tf.subtract(dft, tf.reduce_min(dft)),
+            tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
+        )
+        
+        ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
+        #dft = tf.where(tf.greater(dft, 4.0), 4.0, dft)
+        #ac = tf.math.multiply(ac, 1.6)
+        
+        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
 
-        # Normalized AC values up to 1
-        ac = tf.minimum(ac, 1)
-        hod = tf.minimum(hod, 1)
-        dft = tf.minimum(dft, 1)
-
-        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1) # Split channels
         # Get Logg provided in Hareter, 2013
-        loggs = fields[1219]
+        loggs = fields[1198]
         # Get Luminosity provided in Paparo, 2016
-        teff = fields[1220]
+        teff = fields[1199]
         # Get Luminosity provided in Paparo, 2016
-        l = fields[1221]
+        l = fields[1200]
         return fields[0], x, loggs, teff, l
 
     def csv_reader_dataset(
