@@ -23,7 +23,7 @@ class corot(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1222):
+    def parse_csv_line(self, line, n_inputs=1202):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -54,7 +54,7 @@ class corot(Data):
         hod = tf.minimum(hod, 1)
         dft = tf.minimum(dft, 1)
 
-        x = tf.stack(tf.split(tf.concat([ac], axis=0), 1), axis=-1) # Split channels
+        x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1) # Split channels
         # Get Logg provided in Hareter, 2013
         loggs = fields[1219]
         # Get Luminosity provided in Paparo, 2016
