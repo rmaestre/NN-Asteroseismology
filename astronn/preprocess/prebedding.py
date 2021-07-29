@@ -40,8 +40,7 @@ class prebedding:
     ):
         """
         """
-        input_resolution = 0.25
-        input_bins = np.arange(0, 100.1, 0.25)
+        input_bins = np.arange(0, 100.1, input_resolution)
 
         files = glob.glob(input_folder)
         if len(files) == 0:

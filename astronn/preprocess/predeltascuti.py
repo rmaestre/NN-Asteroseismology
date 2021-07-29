@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 import tensorflow as tf
-
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class predeltascuti:
         """
         """
         input_resolution = 0.25
-        input_bins = np.arange(0, 100.1, 0.25)
+        input_bins = np.arange(0, 100.1, input_resolution)
 
         files = glob.glob(input_folder)
         if len(files) == 0:
@@ -68,7 +68,7 @@ class predeltascuti:
             pandas2ri.activate()
             _res = variable_stars.process(
                 frequency=df[["freq"]].values,
-                amplitude=df[["amp"]].values,
+                amplitude=np.random.uniform(0,1,len(df[["amp"]].values)),
                 filter="uniform",
                 gRegimen=58,
                 numFrequencies=num_frequencies,
@@ -128,7 +128,7 @@ class predeltascuti:
             _df = pd.DataFrame(np.column_stack(line))
             _df.insert(0, "star", file_name.split(".")[0])
             _df.to_csv(
-                output_folder + file_name.split(".")[0] + ".log",
+                output_folder + file_name.split(".")[0] + str(uuid.uuid4()) +".log",
                 index=False,
                 header=False,
             )

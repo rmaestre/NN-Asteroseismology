@@ -41,7 +41,7 @@ class precorot:
         """
         """
         input_resolution = 0.25
-        input_bins = np.arange(-1, 101, input_resolution)
+        input_bins = np.arange(0, 100.1, input_resolution)
 
         files = glob.glob(input_folder)
         if len(files) == 0:
