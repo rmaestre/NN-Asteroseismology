@@ -22,7 +22,7 @@ class inferences:
         return (peak_id, peaks_width[0][np.where(peaks == peak_id)[0][0]])
 
     def get_processed_inferences(
-        self, nn_model, df_stars, take_number, csv_L=False, debug=False
+        self, nn_model, df_stars, take_number, csv_L=False, debug=False, dnu_target=True
     ):
         """
         """
@@ -30,13 +30,25 @@ class inferences:
         results = {}
 
         for star in df_stars.take(take_number):  # take the take_number first stars
-            target = np.where(star[2].numpy().flat == 1)[0].flat[0]
 
             # Save results
-            if star[0].numpy()[0].decode("utf-8") not in results:
-                results[star[0].numpy()[0].decode("utf-8")] = {
-                    "dnu-target": target,
-                }
+            if dnu_target:  # Dnu target
+                target_key = "dnu-target"
+
+                target = np.where(star[2].numpy().flat == 1)[0].flat[0]
+
+                if star[0].numpy()[0].decode("utf-8") not in results:
+                    results[star[0].numpy()[0].decode("utf-8")] = {
+                        target_key: target,
+                    }
+            else:  # logg
+                target_key = "logg-target"
+
+                target = star[2].numpy()[0]
+                if star[0].numpy()[0].decode("utf-8") not in results:
+                    results[star[0].numpy()[0].decode("utf-8")] = {
+                        target_key: target,
+                    }
 
             # Get probabilities given by NN
             probs = nn_model.predict(star[1])[0]
@@ -104,6 +116,13 @@ class inferences:
                     results[star[0].numpy()[0].decode("utf-8")][
                         "dnu-from-P-down"
                     ] = np.nan
+            else:
+                results[star[0].numpy()[0].decode("utf-8")][
+                        "dnu-from-P-up"
+                    ] = np.nan
+                results[star[0].numpy()[0].decode("utf-8")][
+                        "dnu-from-P-down"
+                    ] = np.nan
 
             # Plot star info
             if debug:
@@ -142,7 +161,7 @@ class inferences:
         df = pd.DataFrame(
             columns=[
                 "id",
-                "dnu-target",
+                target_key,
                 "top1",
                 "e-top1",
                 "top2",
@@ -158,7 +177,7 @@ class inferences:
         for i, id in enumerate(results):
             df.loc[i] = [
                 id,
-                results[id]["dnu-target"],
+                results[id][target_key],
                 results[id]["top1"],
                 results[id]["e-top1"],
                 results[id]["top2"],
@@ -171,8 +190,13 @@ class inferences:
                 results[id]["dnu-from-P-down"],
             ]
         # Derive rho from Dnu
-        df["rho-target"] = get_rho(df["dnu-target"] / dnu_sun)
-        df["e-rho-target"] = rho_error(np.float64(df["dnu-target"].values / dnu_sun))
+        if dnu_target:
+            df["rho-target"] = get_rho(df["dnu-target"] / dnu_sun)
+            df["e-rho-target"] = rho_error(np.float64(df["dnu-target"].values / dnu_sun))
+        else:
+            df["rho-target"] = np.nan
+            df["e-rho-target"] = np.nan
+        
         df["rho-top1"] = get_rho(df["top1"] / dnu_sun)
         df["e-rho-top1"] = rho_error(np.float64(df["top1"].values / dnu_sun))
         df["rho-top2"] = get_rho(df["top2"] / dnu_sun)
@@ -297,11 +321,15 @@ class inferences:
                 capsize=2,
                 label=points_label,
                 alpha=0.5,
-                color="mediumblue"
+                color="mediumblue",
             )
         else:
             plt.scatter(
-                dnus / dnu_sun, rhos / rho_sun, label=points_label, alpha=0.5, color="mediumblue"
+                dnus / dnu_sun,
+                rhos / rho_sun,
+                label=points_label,
+                alpha=0.5,
+                color="mediumblue",
             )
 
         # Add id labels on points if ara available
@@ -320,9 +348,7 @@ class inferences:
         rs_lower = get_rho_lower_bound(dnus_line)
 
         # Plot Rho
-        plt.plot(
-            dnus_line, rs / rho_sun, label="Relation (RM-2020)", color="lightblue"
-        )
+        plt.plot(dnus_line, rs / rho_sun, label="Relation (RM-2020)", color="lightblue")
         # Plot lower and upper bounds error
         ax.fill_between(
             dnus_line,
@@ -339,3 +365,64 @@ class inferences:
         plt.ylabel("$\log(\\rho/\\rho_\odot)$")
         plt.xlabel("$\log(\Delta\\nu/\Delta\\nu_\odot)$")
         plt.show()
+
+    
+    def select_best_top1(df, target_column):
+        """
+        Based on non-lineal error distance, this function returns
+        the closest Dnu value to the RM-2020 relation
+        """        
+        select_closest_top = np.argmin(
+            (
+                np.abs(
+                    np.log10(
+                        get_dnu_from_rho(
+                            df[target_column].values.astype(float)
+                        )
+                        / 0.0864
+                    )
+                    - np.log10(
+                        df["top1"].values.astype(float) * 0.0864
+                    )
+                ),
+                np.abs(
+                    np.log10(
+                        get_dnu_from_rho(
+                            df[target_column].values.astype(float)
+                        )
+                        / 0.0864
+                    )
+                    - np.log10(
+                        df["top1"].values.astype(float)
+                        * 1
+                        / 2
+                        * 0.0864
+                    )
+                ),
+                np.abs(
+                    np.log10(
+                        get_dnu_from_rho(
+                            df[target_column].values.astype(float)
+                        )
+                        / 0.0864
+                    )
+                    - np.log10(
+                        df["top1"].values.astype(float) * 2 * 0.0864
+                    )
+                ),
+            ),
+            axis=0,
+        )
+
+        # Select the best top
+        tops = np.where(
+            select_closest_top == 0,
+            df["top1"],
+            np.where(
+                select_closest_top == 1,
+                df["top1"] * 1 / 2,
+                df["top1"] * 2,
+            ),
+        )
+        # Show multiples
+        return tops
