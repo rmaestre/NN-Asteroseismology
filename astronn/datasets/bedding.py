@@ -52,14 +52,17 @@ class bedding(Data):
             tf.subtract(tf.reduce_max(tf.gather(dft, [i for i in range(0, 400)])), tf.reduce_min(dft)),
         )
         """
+
         ac = tf.math.divide(
             tf.subtract(ac, tf.reduce_min(ac)),
             tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
         )
+
         dft = tf.math.divide(
             tf.subtract(dft, tf.reduce_min(dft)),
             tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         )
+        
         
         ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
         #dft = tf.where(tf.greater(dft, 4.0), 4.0, dft)

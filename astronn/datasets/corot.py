@@ -23,7 +23,7 @@ class corot(Data):
         # Process each file
         return self.csv_reader_dataset(glob.glob(folder), batch_size=batch_size)
 
-    def parse_csv_line(self, line, n_inputs=1201):
+    def parse_csv_line(self, line, n_inputs=1204):
         """
         each file will be parsed with this method. Mainly, we read the
         raw data, split it into three dimensions (vector X) and 
@@ -53,14 +53,18 @@ class corot(Data):
             tf.subtract(tf.reduce_max(tf.gather(dft, [i for i in range(0, 400)])), tf.reduce_min(dft)),
         )
         """
+
+    
         ac = tf.math.divide(
             tf.subtract(ac, tf.reduce_min(ac)),
             tf.subtract(tf.reduce_max(ac), tf.reduce_min(ac)),
         )
+
         dft = tf.math.divide(
             tf.subtract(dft, tf.reduce_min(dft)),
             tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         )
+        
         
         ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
         #dft = tf.where(tf.greater(dft, 4.0), 4.0, dft)
@@ -69,11 +73,11 @@ class corot(Data):
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
 
         # Get Logg provided in Hareter, 2013
-        loggs = fields[1198]
+        loggs = fields[1201]
         # Get Luminosity provided in Paparo, 2016
-        teff = fields[1199]
+        teff = fields[1202]
         # Get Luminosity provided in Paparo, 2016
-        l = fields[1200]
+        l = fields[1203]
         return fields[0], x, loggs, teff, l
 
     def csv_reader_dataset(

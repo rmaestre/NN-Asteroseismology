@@ -121,7 +121,7 @@ class starmodels(Data):
         ind_min = tf.cond((aux * 4)-30 < 0, lambda: 0, lambda: (aux*4) - 20)
         
         #tf.print(aux, ind_min, ind_max)
-        
+        """
         indices = tf.range(ind_min, 
                            ind_max, 
                            1, 
@@ -131,6 +131,7 @@ class starmodels(Data):
         ac = tf.tensor_scatter_nd_update(ac, 
                                          tf.reshape(indices, (tf.size(indices), 1)), 
                                          updates)
+        """
         
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
         
