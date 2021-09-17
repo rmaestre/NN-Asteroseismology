@@ -25,24 +25,11 @@ class separableconvnn(Model):
         :rtype: PricingObservation
         """
 
+        """
         self.model = tf.keras.Sequential(
             [
                 layers.Convolution1D(
-                    kernel_size=50,
-                    filters=10,
-                    input_shape=(400, 2),
-                    activation="relu"
-                ),
-                layers.Convolution1D(
-                    kernel_size=10,
-                    filters=10,
-                    input_shape=(400, 2),
-                    activation="relu"
-                ),
-                layers.MaxPool1D(10),
-                layers.BatchNormalization(),
-                layers.Convolution1D(
-                    kernel_size=10,
+                    kernel_size=5,
                     filters=10,
                     input_shape=(400, 2),
                     activation="relu"
@@ -55,16 +42,43 @@ class separableconvnn(Model):
                 ),
                 layers.MaxPool1D(5),
                 layers.BatchNormalization(),
-                layers.Dropout(0.2),
+                layers.Dropout(0.5),
                 layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
         )
-        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=learning_rate, decay_steps=300, decay_rate=0.9
-        )
 
+        """
+        self.model = tf.keras.Sequential(
+            [
+                layers.Dense(400, input_shape=(400, 2), activation="relu"),
+                layers.Dense(200, activation="relu"),
+                layers.Dense(100, activation="relu"),
+                layers.Dense(50, activation="relu"),
+                #layers.Bidirectional(layers.LSTM(50, return_sequences=True), input_shape=(400, 2)),
+                #layers.Bidirectional(layers.LSTM(10)),
+                #layers.LSTM(50, return_sequences=True, input_shape=(400, 2)),
+                #layers.LSTM(100),
+                #layers.LSTM(50),
+                layers.Dropout(0.5),
+                layers.Flatten(),
+                layers.Dense(100, activation="softmax"),
+            ]
+        )
+        
+        
+        
+        
+        
+
+        
+        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=learning_rate, decay_steps=100, decay_rate=0.9
+        )
         opt = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+        """
+        opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+        """
 
         self.model.compile(
             loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"]
