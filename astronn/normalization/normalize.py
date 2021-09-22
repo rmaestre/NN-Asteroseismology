@@ -75,6 +75,8 @@ def normalize_files(dir):
         df_norm.to_csv(file + "_norm", index=False, header=False)
 
 #normalize_files("/home/roberto/Downloads/evolutionTracks_line/parts_train/x*")
+normalize_files("/home/roberto/Downloads/evolutionTracks_line/parts_validation/x*")
+0/0
 
 normalize_files(
     "/home/roberto/Projects/NN-Asteroseismology/astronn/data/deltascuti/preprocessed/*"
