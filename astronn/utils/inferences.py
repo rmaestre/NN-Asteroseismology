@@ -126,10 +126,11 @@ class inferences:
 
             # Plot star info
             if debug:
+                print(star[0].numpy()[0].decode("utf-8"))
                 x = np.arange(0, 100, 0.25)  # x axis from 0 to 100
-                plt.plot(x, star[1][0, :, 0], label="dft", color="blue")
+                plt.plot(x, star[1][0, :, 0], label="ac", color="green")
                 # plt.plot(x, star[1][0, :, 1], label="hod", color="orange", alpha=0.5)
-                plt.plot(x, star[1][0, :, 1], label="ac", color="green")
+                plt.plot(x, star[1][0, :, 1], label="dft", color="blue")
                 plt.axvline(
                     x=results[star[0].numpy()[0].decode("utf-8")]["top1"],
                     label="top1",
@@ -298,9 +299,12 @@ class inferences:
     def plot_relation_rodriguez(
         dnus=None,
         rhos=None,
+        erhos=None,
         ednus=None,
         points_ids=True,
         relation_line_range=(0.1, 2),
+        xlim=None,
+        ylim=None,
         plot_title=None,
         points_label="",
     ):
@@ -312,11 +316,12 @@ class inferences:
         ax.set_yscale("log", basey=10)
 
         # Plot scatter with errorbars or without errorbars
-        if ednus is not None:
+        if ednus is not None and erhos is not None:
             ax.errorbar(
                 dnus / dnu_sun,
                 rhos / rho_sun,
                 xerr=ednus / dnu_sun,
+                yerr=erhos / rho_sun,
                 fmt="o",
                 capsize=2,
                 label=points_label,
@@ -336,12 +341,11 @@ class inferences:
         if points_ids is not None:
             for i, row in points_ids.iteritems():
                 plt.annotate(
-                    row, (dnus[i] / dnu_sun, rhos[i] / rho_sun,), size=9,
+                    row, (dnus[i] / dnu_sun, rhos[i] / rho_sun,), size=6,
                 )
 
         # Plot relation
         dnus_line = np.arange(relation_line_range[0], relation_line_range[1])
-
         # Get rho from RM and its error
         rs = get_rho(dnus_line)
         rs_upper = get_rho_upper_bound(dnus_line)
@@ -358,10 +362,34 @@ class inferences:
             color="lightblue",
         )
 
+        # Plot relation
+        dnus_line = np.arange(relation_line_range[0], relation_line_range[1])
+        # Get rho from RM and its error
+        rs = get_rho_gh17(dnus_line)
+        rs_upper = get_rho_gh17_upper_bound(dnus_line)
+        rs_lower = get_rho_gh17_lower_bound(dnus_line)
+
+        # Plot Rho
+        plt.plot(dnus_line, rs / rho_sun, label="Relation (GH-2017)", color="orange")
+        # Plot lower and upper bounds error
+        ax.fill_between(
+            dnus_line,
+            rs_lower / rho_sun,
+            rs_upper / rho_sun,
+            alpha=0.2,
+            color="orange",
+        )
+
         plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 
         if plot_title is not None:
             plt.title(plot_title)
+
+        if xlim is not None:
+            plt.xlim(xlim[0], xlim[1])
+        if ylim is not None:
+            plt.ylim(ylim[0], ylim[1])
+
         plt.ylabel("$\log(\\rho/\\rho_\odot)$")
         plt.xlabel("$\log(\Delta\\nu/\Delta\\nu_\odot)$")
         plt.show()

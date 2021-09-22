@@ -42,6 +42,24 @@ def p_error(log_L, A=1.4722, e_A=0.1, B=2.6089, e_B=0.096):
     )
 
 
+def get_rho_gh17(delta_nu):
+    """
+    Relation Rodriguez-Martin et.al. 2020
+    """
+    return 1.5 * np.power(delta_nu, 2.04)
+
+def get_rho_gh17_upper_bound(delta_nu, e_A=0.5, e_B=0.0):
+    """
+    Relation Rodriguez-Martin et.al. 2020
+    """
+    return (1.5 + e_A) * np.power(delta_nu, (2.04 + e_B))
+
+def get_rho_gh17_lower_bound(delta_nu, e_A=0.5, e_B=0.0):
+    """
+    Relation Rodriguez-Martin et.al. 2020
+    """
+    return (1.5 - (e_A - 0.1)) * np.power(delta_nu, (2.04 - e_B))
+
 def get_rho(delta_nu):
     """
     Relation Rodriguez-Martin et.al. 2020
