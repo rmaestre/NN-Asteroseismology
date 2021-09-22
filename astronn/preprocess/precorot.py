@@ -12,6 +12,7 @@ import pandas as pd
 
 import tensorflow as tf
 
+import uuid
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class precorot:
                 frequency=df[["freq"]].values,
                 amplitude=df[["amp"]].values,
                 filter="uniform",
-                gRegimen=0,
+                gRegimen=58,
                 numFrequencies=num_frequencies,
                 maxDnu=1,
                 minDnu=15,
@@ -112,15 +113,23 @@ class precorot:
             l = self.conf[self.conf.corot == int(file_name.split(".")[0])]["l"]
             # Stak all channels
             line = np.hstack((dft[0], hd[0], ac[0], loggs, teff, l)).ravel()
-            line[pd.isnull(line)] = 0  # NaN to zeros
-            line = line[3:]  # drop firsts n values
+
+            # Stak all channels
+            line = np.hstack(
+                    (
+                        np.nan_to_num(np.around(dft[0], 3)),
+                        np.nan_to_num(np.around(hd[0], 3)),
+                        np.nan_to_num(np.around(ac[0], 3)),
+                        loggs, teff, l
+                    )
+                ).ravel()
+            line[np.isnan(line)] = 0  # NaN to zeros
 
             # Save to disk
             _df = pd.DataFrame(np.column_stack(line))
             _df.insert(0, "star", file_name.split(".")[0])
-            
             _df.to_csv(
-                output_folder + file_name.split(".")[0] + ".log",
+                output_folder + file_name.split(".")[0] + str(uuid.uuid4()) +".log",
                 index=False,
                 header=False,
             )
