@@ -25,24 +25,24 @@ class separableconvnn(Model):
         :rtype: PricingObservation
         """
 
-        """
+        
         self.model = tf.keras.Sequential(
             [
                 layers.Convolution1D(
-                    kernel_size=5,
+                    kernel_size=10,
                     filters=10,
                     input_shape=(400, 2),
-                    activation="relu"
-                ),
-                layers.Convolution1D(
-                    kernel_size=5,
-                    filters=10,
-                    input_shape=(400, 2),
-                    activation="relu"
+                    activation="elu"
                 ),
                 layers.MaxPool1D(5),
+                layers.Convolution1D(
+                    kernel_size=20,
+                    filters=20,
+                    activation="elu"
+                ),
+                layers.MaxPool1D(2),
                 layers.BatchNormalization(),
-                layers.Dropout(0.5),
+                layers.Dropout(0.2),
                 layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
@@ -65,15 +65,9 @@ class separableconvnn(Model):
                 layers.Dense(100, activation="softmax"),
             ]
         )
-        
-        
-        
-        
-        
-
-        
+        """
         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=learning_rate, decay_steps=100, decay_rate=0.9
+            initial_learning_rate=learning_rate, decay_steps=200, decay_rate=0.9
         )
         opt = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
         """
@@ -81,7 +75,7 @@ class separableconvnn(Model):
         """
 
         self.model.compile(
-            loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"]
+            loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"]
         )
 
         self.model.summary()
