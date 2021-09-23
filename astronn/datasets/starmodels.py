@@ -137,6 +137,7 @@ class starmodels(Data):
         
         # If target value > 100, return False as flag, to be filtered
         return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
+        #return x, x, tf.cond(aux < 100, lambda: True, lambda: False)
     
         
 
@@ -163,4 +164,4 @@ class starmodels(Data):
             lambda x, y, flag: flag
         )  # Filter y_hat targets markes as False
         dataset = dataset.batch(batch_size)
-        return dataset.prefetch(1)
+        return dataset.prefetch(tf.data.AUTOTUNE)
