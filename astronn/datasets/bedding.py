@@ -69,6 +69,7 @@ class bedding(Data):
         #ac = tf.math.multiply(ac, 1.6)
         
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
+        
         # Get Dnu (-1) or dr (-2)
         y = tf.reshape(
             tf.one_hot(

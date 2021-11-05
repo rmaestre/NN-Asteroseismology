@@ -1,4 +1,7 @@
 import logging
+from tensorflow.python.keras.layers.core import Flatten
+
+from tensorflow.python.ops.gen_array_ops import Reshape
 
 from astronn import Model
 
@@ -25,11 +28,10 @@ class separableconvnn(Model):
         :rtype: PricingObservation
         """
 
-        
         self.model = tf.keras.Sequential(
             [
                 layers.Convolution1D(
-                    kernel_size=2,
+                    kernel_size=5,
                     filters=10,
                     input_shape=(400, 2),
                     activation="elu"
@@ -40,44 +42,25 @@ class separableconvnn(Model):
                     activation="elu"
                 ),
                 layers.MaxPool1D(2),
-                layers.BatchNormalization(),
-                layers.Dropout(0.3),
                 layers.Convolution1D(
-                    kernel_size=15,
+                    kernel_size=2,
                     filters=10,
                     activation="elu"
                 ),
                 layers.Convolution1D(
-                    kernel_size=20,
-                    filters=10,
+                    kernel_size=2,
+                    filters=5,
                     activation="elu"
                 ),
                 layers.MaxPool1D(2),
                 layers.BatchNormalization(),
-                layers.Dropout(0.4),
+                layers.Dropout(0.3),
                 layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
         )
 
-        """
-        self.model = tf.keras.Sequential(
-            [
-                layers.Dense(400, input_shape=(400, 2), activation="relu"),
-                layers.Dense(200, activation="relu"),
-                layers.Dense(100, activation="relu"),
-                layers.Dense(50, activation="relu"),
-                #layers.Bidirectional(layers.LSTM(50, return_sequences=True), input_shape=(400, 2)),
-                #layers.Bidirectional(layers.LSTM(10)),
-                #layers.LSTM(50, return_sequences=True, input_shape=(400, 2)),
-                #layers.LSTM(100),
-                #layers.LSTM(50),
-                layers.Dropout(0.5),
-                layers.Flatten(),
-                layers.Dense(100, activation="softmax"),
-            ]
-        )
-        """
+
         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=learning_rate, decay_steps=200, decay_rate=0.9
         )
