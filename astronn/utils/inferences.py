@@ -117,12 +117,8 @@ class inferences:
                         "dnu-from-P-down"
                     ] = np.nan
             else:
-                results[star[0].numpy()[0].decode("utf-8")][
-                        "dnu-from-P-up"
-                    ] = np.nan
-                results[star[0].numpy()[0].decode("utf-8")][
-                        "dnu-from-P-down"
-                    ] = np.nan
+                results[star[0].numpy()[0].decode("utf-8")]["dnu-from-P-up"] = np.nan
+                results[star[0].numpy()[0].decode("utf-8")]["dnu-from-P-down"] = np.nan
 
             # Plot star info
             if debug:
@@ -193,11 +189,13 @@ class inferences:
         # Derive rho from Dnu
         if dnu_target:
             df["rho-target"] = get_rho(df["dnu-target"] / dnu_sun)
-            df["e-rho-target"] = rho_error(np.float64(df["dnu-target"].values / dnu_sun))
+            df["e-rho-target"] = rho_error(
+                np.float64(df["dnu-target"].values / dnu_sun)
+            )
         else:
             df["rho-target"] = np.nan
             df["e-rho-target"] = np.nan
-        
+
         df["rho-top1"] = get_rho(df["top1"] / dnu_sun)
         df["e-rho-top1"] = rho_error(np.float64(df["top1"].values / dnu_sun))
         df["rho-top2"] = get_rho(df["top2"] / dnu_sun)
@@ -394,49 +392,33 @@ class inferences:
         plt.xlabel("$\log(\Delta\\nu/\Delta\\nu_\odot)$")
         plt.show()
 
-    
     def select_best_top1(df, target_column):
         """
         Based on non-lineal error distance, this function returns
         the closest Dnu value to the RM-2020 relation
-        """        
+        """
         select_closest_top = np.argmin(
             (
                 np.abs(
                     np.log10(
-                        get_dnu_from_rho(
-                            df[target_column].values.astype(float)
-                        )
+                        get_dnu_from_rho(df[target_column].values.astype(float))
                         / 0.0864
                     )
-                    - np.log10(
-                        df["top1"].values.astype(float) * 0.0864
-                    )
+                    - np.log10(df["top1"].values.astype(float) * 0.0864)
                 ),
                 np.abs(
                     np.log10(
-                        get_dnu_from_rho(
-                            df[target_column].values.astype(float)
-                        )
+                        get_dnu_from_rho(df[target_column].values.astype(float))
                         / 0.0864
                     )
-                    - np.log10(
-                        df["top1"].values.astype(float)
-                        * 1
-                        / 2
-                        * 0.0864
-                    )
+                    - np.log10(df["top1"].values.astype(float) * 1 / 2 * 0.0864)
                 ),
                 np.abs(
                     np.log10(
-                        get_dnu_from_rho(
-                            df[target_column].values.astype(float)
-                        )
+                        get_dnu_from_rho(df[target_column].values.astype(float))
                         / 0.0864
                     )
-                    - np.log10(
-                        df["top1"].values.astype(float) * 2 * 0.0864
-                    )
+                    - np.log10(df["top1"].values.astype(float) * 2 * 0.0864)
                 ),
             ),
             axis=0,
@@ -446,11 +428,21 @@ class inferences:
         tops = np.where(
             select_closest_top == 0,
             df["top1"],
-            np.where(
-                select_closest_top == 1,
-                df["top1"] * 1 / 2,
-                df["top1"] * 2,
-            ),
+            np.where(select_closest_top == 1, df["top1"] * 1 / 2, df["top1"] * 2,),
         )
         # Show multiples
         return tops
+
+    def check_dnu_in_RM_relation(dnu, e_dnu, rho, e_rho=0):
+        """
+        Check in dnu is inside the error bounds of the RM relation
+        """
+        # Get rho with upper and lower limits
+        rs_upper = get_rho_upper_bound((dnu + e_dnu) / dnu_sun)
+        rs_lower = get_rho_lower_bound((dnu - e_dnu) / dnu_sun)
+
+        # Check if proposed rho is inside bands
+        if rho - e_rho >= rs_lower and rho + e_rho <= rs_upper:
+            return True
+        else:
+            return False
