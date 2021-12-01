@@ -70,13 +70,12 @@ class starmodels(Data):
                 lambda: tf.convert_to_tensor(hod),
             )
             """
-            
+
             ac = tf.cond(
                 tf.random.uniform([], 0, 1) > 0.5,
                 lambda: add_noise_positive(ac),
                 lambda: tf.convert_to_tensor(ac),
             )
-            
 
         # Normalized HoD between 0,1
         # Normalized HoD between 0,1
@@ -98,29 +97,25 @@ class starmodels(Data):
             tf.subtract(dft, tf.reduce_min(dft)),
             tf.subtract(tf.reduce_max(dft), tf.reduce_min(dft)),
         )
-        
+
         dft = tf.where(tf.greater(dft, 1.0), 1.0, dft)
         ac = tf.where(tf.greater(ac, 1.0), 1.0, ac)
-        #ac = tf.math.multiply(ac, 1.2)
-        
+        # ac = tf.math.multiply(ac, 1.2)
 
-        
         # Get Dnu (-1) or dr (-2)
         aux = tf.cast(tf.convert_to_tensor(fields[-1:]) / 0.0864, tf.int32)
-        aux = tf.cond(aux>100,lambda:100,lambda:aux)
+
+        """
+        aux = tf.cond(
+            tf.random.uniform([], 0, 1) > 0.5, lambda: tf.multiply(aux, 2), lambda: aux,
+        )
+        """
+
+        aux = tf.cond(aux > 100, lambda: 100, lambda: aux)
 
         # Target to one-hot vector
         y = tf.keras.backend.flatten(tf.one_hot(depth=100, indices=aux))
-        
-        # Remove GAP on real values
-        
-        #ind_max = tf.math.reduce_min([tf.squeeze(aux * 4) + 1, 400])
-        #ind_min = tf.math.reduce_max([tf.squeeze(aux * 4) - 1, 0])
-        
-        ind_max = tf.cond((aux * 4)+30 > 400, lambda: 400, lambda: (aux*4) + 20)
-        ind_min = tf.cond((aux * 4)-30 < 0, lambda: 0, lambda: (aux*4) - 20)
-        
-        #tf.print(aux, ind_min, ind_max)
+
         """
         indices = tf.range(ind_min, 
                            ind_max, 
@@ -132,15 +127,12 @@ class starmodels(Data):
                                          tf.reshape(indices, (tf.size(indices), 1)), 
                                          updates)
         """
-        
+
         x = tf.stack(tf.split(tf.concat([ac, dft], axis=0), 2), axis=-1)
-        
+
         # If target value > 100, return False as flag, to be filtered
         return x, y, tf.cond(aux < 100, lambda: True, lambda: False)
-        #return x, x, tf.cond(aux < 100, lambda: True, lambda: False)
-    
-        
-
+        # return x, x, tf.cond(aux < 100, lambda: True, lambda: False)
 
     def csv_reader_dataset(
         self,

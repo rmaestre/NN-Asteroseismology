@@ -1,13 +1,10 @@
 import logging
-from tensorflow.python.keras.layers.core import Flatten
-
 from tensorflow.python.ops.gen_array_ops import Reshape
 
 from astronn import Model
 
 import tensorflow as tf
 from tensorflow.keras import layers
-from keras.models import load_model
 
 
 class separableconvnn(Model):
@@ -23,39 +20,27 @@ class separableconvnn(Model):
     def compile(self, learning_rate):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
 
         self.model = tf.keras.Sequential(
             [
+                layers.GaussianNoise(0.1, input_shape=(400, 2)),
                 layers.Convolution1D(
-                    kernel_size=20,
-                    filters=20,
-                    input_shape=(400, 2),
-                    activation="elu"
+                    kernel_size=20, filters=20, input_shape=(400, 2), activation="elu"
                 ),
                 layers.MaxPool1D(1),
                 layers.Convolution1D(
-                    kernel_size=10,
-                    filters=15,
-                    activation="elu"
+                    kernel_size=10, filters=10, input_shape=(400, 2), activation="elu"
                 ),
                 layers.MaxPool1D(1),
-                layers.Convolution1D(
-                    kernel_size=10,
-                    filters=5,
-                    activation="elu"
-                ),
+                layers.Convolution1D(kernel_size=10, filters=5, activation="elu"),
                 layers.MaxPool1D(1),
                 layers.BatchNormalization(),
-                layers.Dropout(0.4),
+                layers.Dropout(0.5),
                 layers.Flatten(),
                 layers.Dense(100, activation="softmax"),
             ]
         )
-
 
         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=learning_rate, decay_steps=200, decay_rate=0.9
@@ -66,7 +51,7 @@ class separableconvnn(Model):
         """
 
         self.model.compile(
-            loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"]
+            loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"]
         )
 
         self.model.summary()
@@ -74,9 +59,6 @@ class separableconvnn(Model):
     def fit(self, dataset, steps_per_epoch, epochs):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
 
         history = self.model.fit(
@@ -87,35 +69,23 @@ class separableconvnn(Model):
     def predict_classes(self, data):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
         return self.model.predict_classes(data)
 
     def predict_probs(self, data):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
         return self.model.predict_probs(data)
 
     def save(self, path):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
         self.model.save(path)
 
     def load(self, path):
         """
         load all files on a given directory (and recursive directories)
-
-        :return: [description]
-        :rtype: PricingObservation
         """
         self.model.load(path)
